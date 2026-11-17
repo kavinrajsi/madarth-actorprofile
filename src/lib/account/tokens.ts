@@ -13,5 +13,4 @@ export function hashToken(token: string): string {
 export const TOKEN_TTL_MS = {
   setup: 7 * 24 * 3600 * 1000,
   reset: 60 * 60 * 1000,
-  email_change: 24 * 3600 * 1000,
 } as const;

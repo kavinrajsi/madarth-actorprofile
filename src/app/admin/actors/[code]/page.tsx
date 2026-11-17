@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/site/BackLink';
 import {notFound} from 'next/navigation';
 import {Gallery} from '@/components/admin/Gallery';
 import {NotesEditor} from '@/components/admin/NotesEditor';
@@ -55,9 +55,7 @@ export default async function ActorPage({params}: {params: Promise<{code: string
   return (
     <>
       <div>
-        <Link href="/admin" style={{color: 'var(--mad-muted)', fontSize: 14}}>
-          ← All profiles
-        </Link>
+        <BackLink href="/admin" label="All profiles" />
       </div>
       <div className={styles.pageHead}>
         <div>

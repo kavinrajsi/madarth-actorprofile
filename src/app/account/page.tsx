@@ -5,7 +5,7 @@ import {Button} from '@astryxdesign/core/Button';
 import {MetadataList, MetadataListItem} from '@astryxdesign/core/MetadataList';
 import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {Step, Stepper} from '@astryxdesign/core/Stepper';
-import {ChangeEmailForm, DeleteProfile} from '@/components/account/AccountControls';
+import {DeleteProfile} from '@/components/account/AccountControls';
 import {MaterialIcon} from '@/components/icons/MaterialIcon';
 import {getDb, schema} from '@/db';
 import {ageFromDob} from '@/lib/age';
@@ -211,7 +211,10 @@ export default async function AccountPage({
             <ul className={styles.settings}>
               <li>
                 <MaterialIcon name="mail" />
-                <ChangeEmailForm current={account.email} />
+                <div className={styles.settingBody}>
+                  <span className={styles.settingLabel}>Login email</span>
+                  <span className={styles.meta}>{account.email}</span>
+                </div>
               </li>
               <li>
                 <MaterialIcon name="lock" />

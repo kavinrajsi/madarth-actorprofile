@@ -8,7 +8,7 @@ import {inviteEmail, thankYouEmail} from '@/lib/email/templates';
 import {siteUrl} from '@/lib/site-url';
 import {hashToken, newToken, TOKEN_TTL_MS} from './tokens';
 
-type Purpose = 'setup' | 'reset' | 'email_change';
+type Purpose = 'setup' | 'reset';
 const {actorAccounts, accountTokens, actors} = schema;
 
 export async function findAccountByEmail(email: string): Promise<ActorAccount | null> {
@@ -30,7 +30,7 @@ export async function ensureAccount(email: string): Promise<ActorAccount> {
 }
 
 /** Issues a new single-use token; earlier unused tokens of the same purpose stop working. */
-export async function issueToken(accountId: string, purpose: Purpose, newEmail?: string): Promise<string> {
+export async function issueToken(accountId: string, purpose: Purpose): Promise<string> {
   const db = getDb();
   const {token, hash} = newToken();
   await db.batch([
@@ -42,7 +42,6 @@ export async function issueToken(accountId: string, purpose: Purpose, newEmail?:
       accountId,
       purpose,
       tokenHash: hash,
-      newEmail: newEmail ?? null,
       expiresAt: new Date(Date.now() + TOKEN_TTL_MS[purpose]),
     }),
   ]);

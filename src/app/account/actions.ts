@@ -18,7 +18,7 @@ import {
 import {endActorSession, requireActorAccount, startActorSession} from '@/lib/account/session';
 import {TOKEN_TTL_MS} from '@/lib/account/tokens';
 import {sendAndLog} from '@/lib/email/send';
-import {emailChangeEmail, passwordResetEmail} from '@/lib/email/templates';
+import {passwordResetEmail} from '@/lib/email/templates';
 import {safeError} from '@/lib/log';
 import {rateLimit} from '@/lib/rate-limit';
 import {siteUrl} from '@/lib/site-url';
@@ -127,35 +127,6 @@ export async function forgotPasswordAction(rawEmail: string): Promise<ActionResu
   } catch (err) {
     console.error('[account] forgot password failed:', safeError(err));
   }
-  return {ok: true};
-}
-
-// ── Email change ─────────────────────────────────────────────────────────────
-
-export async function requestEmailChangeAction(rawNewEmail: string, password: string): Promise<ActionResult> {
-  const account = await requireActorAccount();
-  const newEmail = rawNewEmail.trim().toLowerCase();
-  if (!emailSchema.safeParse(newEmail).success) {
-    return {ok: false, message: 'Enter a valid email address.', fieldErrors: {newEmail: 'Enter a valid email address'}};
-  }
-  if (newEmail === account.email) {
-    return {ok: false, message: 'That is already your email.', fieldErrors: {newEmail: 'That is already your email'}};
-  }
-  if (!(await rateLimit('actor-email-change', 5, 3600))) {
-    return {ok: false, message: 'Too many requests. Please try again later.'};
-  }
-  if (!(await verifyPassword(password, account.passwordHash))) {
-    return {ok: false, message: 'Password is incorrect.', fieldErrors: {password: 'Password is incorrect'}};
-  }
-  if (await findAccountByEmail(newEmail)) {
-    return {ok: false, message: 'That email already has an account.', fieldErrors: {newEmail: 'That email already has an account'}};
-  }
-  const token = await issueToken(account.id, 'email_change', newEmail);
-  await sendAndLog({
-    to: newEmail,
-    kind: 'email_change',
-    email: emailChangeEmail({link: `${siteUrl()}/account/confirm-email?token=${token}`, newEmail}),
-  });
   return {ok: true};
 }
 

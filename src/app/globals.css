@@ -128,3 +128,18 @@ textarea {
   color: var(--mad-yellow);
   text-underline-offset: 3px;
 }
+
+/* Back link with Material arrow icon */
+.mad-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mad-muted);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.mad-back:hover,
+.mad-back:focus-visible {
+  color: var(--mad-paper);
+}

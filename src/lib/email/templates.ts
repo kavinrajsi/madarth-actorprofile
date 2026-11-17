@@ -96,21 +96,3 @@ Choose a new password: ${p.link}
 This link works once and expires in ${p.minutes} minutes. If you didn't ask for this, ignore this email.`;
   return {subject, html, text};
 }
-
-export function emailChangeEmail(p: {link: string; newEmail: string}): Email {
-  const subject = 'Confirm your new email for Madarth Casting';
-  const html = layout(
-    subject,
-    `<h1 style="margin:0 0 16px;font-size:24px;line-height:30px;">Confirm your new email</h1>
-<p style="margin:0;">Click below to use <strong>${esc(p.newEmail)}</strong> as the login and contact email for your actor profile.</p>
-${button(p.link, 'Confirm email')}
-<p style="margin:16px 0 0;font-size:14px;color:#444444;">This link expires in 24 hours. If you didn't ask for this, ignore this email.</p>`,
-  );
-  const text = `Confirm your new email
-
-Use ${p.newEmail} as the login and contact email for your actor profile:
-${p.link}
-
-This link expires in 24 hours. If you didn't ask for this, ignore this email.`;
-  return {subject, html, text};
-}

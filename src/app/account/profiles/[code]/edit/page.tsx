@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import {BackLink} from '@/components/site/BackLink';
 import {notFound} from 'next/navigation';
 import {and, asc, eq, sql} from 'drizzle-orm';
 import {ProfileForm, type ProfileFormState} from '@/components/form/ProfileForm';
@@ -70,9 +70,7 @@ export default async function EditProfilePage({params}: {params: Promise<{code: 
   return (
     <div className={styles.column}>
       <div>
-        <Link href="/account" style={{color: 'var(--mad-muted)', fontSize: 14}}>
-          ← My account
-        </Link>
+        <BackLink href="/account" label="My account" />
       </div>
       <header className={styles.head}>
         <span className="mad-eyebrow">{a.actorCode}</span>

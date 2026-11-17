@@ -2,114 +2,65 @@
 
 import {useState, useTransition} from 'react';
 import {useRouter} from 'next/navigation';
-import {Banner} from '@astryxdesign/core/Banner';
+import {AlertDialog} from '@astryxdesign/core/AlertDialog';
 import {Button} from '@astryxdesign/core/Button';
 import {TextInput} from '@astryxdesign/core/TextInput';
-import {deleteProfileAction, requestEmailChangeAction} from '@/app/account/actions';
+import {deleteProfileAction} from '@/app/account/actions';
 import styles from './account.module.css';
 
 const err = (m?: string) => (m ? {type: 'error' as const, message: m} : undefined);
 
-export function ChangeEmailForm({current}: {current: string}) {
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [message, setMessage] = useState<{ok: boolean; text: string} | null>(null);
-  const [isPending, start] = useTransition();
-
-  const summary = (
-    <div className={styles.settingBody}>
-      <span className={styles.settingLabel}>Login email</span>
-      <span className={styles.meta}>{current}</span>
-    </div>
-  );
-  if (!open) {
-    return (
-      <>
-        {summary}
-        <Button variant="secondary" size="sm" label="Change email" onClick={() => setOpen(true)} />
-      </>
-    );
-  }
-  if (message?.ok) {
-    return (
-      <div className={styles.settingWide}>
-        {summary}
-        <Banner status="success" title={message.text} />
-      </div>
-    );
-  }
-  return (
-    <form
-      className={`${styles.form} ${styles.settingWide}`}
-      noValidate
-      onSubmit={(e) => {
-        e.preventDefault();
-        setErrors({});
-        setMessage(null);
-        start(async () => {
-          const res = await requestEmailChangeAction(email, password);
-          if (res.ok) setMessage({ok: true, text: `We sent a confirmation link to ${email}. Your email changes when you click it.`});
-          else {
-            setErrors(res.fieldErrors ?? {});
-            setMessage({ok: false, text: res.message});
-          }
-        });
-      }}
-    >
-      {summary}
-      <TextInput label="New email" type="email" value={email} onChange={setEmail} autoComplete="email" status={err(errors.newEmail)} width="100%" />
-      <TextInput
-        label="Current password"
-        type="password"
-        value={password}
-        onChange={setPassword}
-        autoComplete="current-password"
-        status={err(errors.password)}
-        width="100%"
-      />
-      {message && !message.ok && !Object.keys(errors).length && <Banner status="error" title={message.text} />}
-      <div className={styles.actions}>
-        <Button type="submit" variant="primary" label="Send confirmation link" isLoading={isPending} />
-        <Button variant="ghost" label="Cancel" onClick={() => setOpen(false)} />
-      </div>
-    </form>
-  );
-}
-
 export function DeleteProfile({code, isLast}: {code: string; isLast: boolean}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isPending, start] = useTransition();
+  const typed = text.trim().toUpperCase() === 'DELETE';
+
+  function reset() {
+    setOpen(false);
+    setConfirmOpen(false);
+    setText('');
+    setError(null);
+  }
 
   if (!open) return <Button variant="ghost" size="sm" label="Delete profile" onClick={() => setOpen(true)} />;
   return (
     <div className={styles.danger}>
+      {/* Step 1: type DELETE */}
       <p style={{margin: 0}}>
         This permanently deletes profile <strong>{code}</strong> and all its photos. It cannot be undone.
         {isLast ? ' Your account will be closed too.' : ''}
       </p>
       <TextInput label="Type DELETE to confirm" value={text} onChange={setText} autoComplete="off" status={err(error ?? undefined)} width="100%" />
       <div className={styles.actions}>
-        <Button
-          variant="destructive"
-          label="Delete permanently"
-          isLoading={isPending}
-          isDisabled={text.trim().toUpperCase() !== 'DELETE'}
-          onClick={() =>
-            start(async () => {
-              const res = await deleteProfileAction(code, text);
-              if (!res.ok) return setError(res.message);
-              router.push(isLast ? '/account/login?notice=deleted' : '/account?deleted=1');
-              router.refresh();
-            })
-          }
-        />
-        <Button variant="ghost" label="Cancel" onClick={() => setOpen(false)} />
+        <Button variant="destructive" label="Delete profile" isDisabled={!typed} onClick={() => setConfirmOpen(true)} />
+        <Button variant="ghost" label="Cancel" onClick={reset} />
       </div>
+
+      {/* Step 2: final confirmation */}
+      <AlertDialog
+        isOpen={confirmOpen}
+        onOpenChange={(o) => !isPending && setConfirmOpen(o)}
+        title={`Delete profile ${code}?`}
+        description={`Your details and all photos will be removed for good and the casting team will no longer see this profile.${isLast ? ' Your account will be closed and you will be signed out.' : ''} This cannot be undone.`}
+        actionLabel="Yes, delete permanently"
+        cancelLabel="Keep my profile"
+        isActionLoading={isPending}
+        onAction={() =>
+          start(async () => {
+            const res = await deleteProfileAction(code, text);
+            if (!res.ok) {
+              setConfirmOpen(false);
+              return setError(res.message);
+            }
+            router.push(isLast ? '/account/login?notice=deleted' : '/account?deleted=1');
+            router.refresh();
+          })
+        }
+      />
     </div>
   );
 }

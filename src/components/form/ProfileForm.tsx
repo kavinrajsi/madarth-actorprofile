@@ -305,7 +305,7 @@ export function ProfileForm({uploadMode, edit}: {uploadMode: UploadMode; edit?: 
             value={s.email}
             onChange={(v) => set('email', v)}
             isReadOnly={isEdit}
-            description={isEdit ? 'This is your login email. Change it from your account page.' : undefined}
+            description={isEdit ? 'This is your login email and can’t be changed.' : undefined}
             isRequired
             autoComplete="email"
             status={err(errors.email)}

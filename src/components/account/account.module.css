@@ -267,8 +267,13 @@
 .idList {
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+}
+
+/* Actor ID gets its own line so it never wraps mid-code. */
+.idList > div:first-child {
+  grid-column: 1 / -1;
 }
 
 .idList dt {
@@ -286,6 +291,7 @@
 .code {
   font-variant-numeric: tabular-nums;
   color: var(--mad-yellow);
+  white-space: nowrap;
 }
 
 .main {

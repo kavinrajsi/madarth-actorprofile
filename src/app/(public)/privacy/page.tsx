@@ -77,7 +77,7 @@ export default function PrivacyPage() {
         <ul>
           <li>To review your profile for current and future casting requirements: films, ads, campaigns and other productions.</li>
           <li>To contact you about auditions or roles by phone, WhatsApp or email.</li>
-          <li>To send you account emails: a registration thank-you, your account invitation, password resets and email changes.</li>
+          <li>To send you account emails: a registration thank-you, your account invitation and password resets.</li>
           <li>To keep an organised talent database so the casting team can search and shortlist actors.</li>
           <li>To prevent spam, fraud and duplicate profiles.</li>
         </ul>
