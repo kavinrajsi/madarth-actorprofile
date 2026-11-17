@@ -57,6 +57,18 @@ img {
   color: var(--mad-yellow);
 }
 
+/* Full-height page column: content grows, footer sits at the bottom of short pages. */
+.mad-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mad-shell > main,
+.mad-shell > div {
+  flex: 1 0 auto;
+}
+
 .mad-container {
   width: 100%;
   max-width: 1280px;

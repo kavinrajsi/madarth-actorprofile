@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import {Suspense} from 'react';
 import {Button} from '@astryxdesign/core/Button';
-import {SiteFooter} from '@/components/site/SiteHeader';
+import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
 import styles from '@/components/site/site.module.css';
 
 export const metadata: Metadata = {title: 'Profile submitted', robots: {index: false}};
@@ -14,6 +14,7 @@ async function Code({params}: {params: Promise<{code: string}>}) {
 export default function SubmittedPage({params}: {params: Promise<{code: string}>}) {
   return (
     <>
+      <SiteHeader />
       <main className={`mad-container ${styles.center}`}>
         <div className={styles.hero}>
           <span className="mad-eyebrow">Profile submitted</span>

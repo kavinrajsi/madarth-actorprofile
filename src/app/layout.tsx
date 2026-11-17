@@ -24,7 +24,9 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
   return (
     <html lang="en" className={anekTamil.variable}>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="mad-shell">{children}</div>
+        </Providers>
       </body>
     </html>
   );

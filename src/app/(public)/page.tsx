@@ -1,5 +1,5 @@
 import {ProfileForm} from '@/components/form/ProfileForm';
-import {SiteFooter} from '@/components/site/SiteHeader';
+import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
 import styles from '@/components/site/site.module.css';
 
 export default function RegisterPage() {
@@ -7,6 +7,7 @@ export default function RegisterPage() {
   const uploadMode = process.env.BLOB_READ_WRITE_TOKEN ? 'token' : 'presigned';
   return (
     <>
+      <SiteHeader />
       <main className="mad-container">
         <h1 className="mad-visually-hidden">Actor registration</h1>
         <div className={styles.formColumn}>

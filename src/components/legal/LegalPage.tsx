@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import {SiteFooter} from '@/components/site/SiteHeader';
+import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
 import {LEGAL, POLICY_LINKS} from '@/lib/legal';
 import styles from './legal.module.css';
 
@@ -14,6 +14,7 @@ type Props = {
 export function LegalPage({title, intro, sections, children}: Props) {
   return (
     <>
+      <SiteHeader />
       <main className="mad-container">
         <article className={styles.article}>
           <header className={styles.head}>
