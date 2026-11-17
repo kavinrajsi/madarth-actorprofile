@@ -2,7 +2,7 @@
 
 import {useEffect, useState, useTransition} from 'react';
 import {useRouter} from 'next/navigation';
-import {browserSupportsWebAuthn, startAuthentication, startRegistration} from '@simplewebauthn/browser';
+import {browserSupportsWebAuthn, startAuthentication, startRegistration} from '@/lib/account/webauthn-browser';
 import {AlertDialog} from '@astryxdesign/core/AlertDialog';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
@@ -236,7 +236,7 @@ export function SignInSecondStep({passkeysOffered}: {passkeysOffered: boolean}) 
       const opts = await passkeySignInOptionsAction();
       if (!opts.ok) return setError(opts.message);
       try {
-        const response = await startAuthentication({optionsJSON: opts.options});
+        const response = await startAuthentication(opts.options);
         const res = await passkeySignInVerifyAction(response);
         if (res.ok) done();
         else setError(res.message);
@@ -337,7 +337,7 @@ export function SecuritySettings({
       const opts = await passkeyRegisterOptionsAction();
       if (!opts.ok) return setError(opts.message);
       try {
-        const response = await startRegistration({optionsJSON: opts.options});
+        const response = await startRegistration(opts.options);
         const res = await passkeyRegisterVerifyAction(response, deviceName());
         if (!res.ok) return setError(res.message);
         setNotice('Passkey added. Next time, sign in with your fingerprint or Face ID.');
