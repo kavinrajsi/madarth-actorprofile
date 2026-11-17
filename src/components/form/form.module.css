@@ -1,0 +1,180 @@
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  padding-block: 40px;
+  border-top: 1px solid var(--mad-line);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sectionText {
+  color: var(--mad-muted);
+  font-size: 15px;
+  line-height: 22px;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+  }
+  .sectionTitle {
+    font-size: 40px;
+    line-height: 44px;
+  }
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.guardian {
+  border: 1px solid var(--mad-yellow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guidelines {
+  border-left: 0;
+  background: #171717;
+  padding: 20px;
+}
+
+.guidelines ul {
+  margin: 8px 0 12px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  line-height: 22px;
+}
+
+.guidelinesTitle {
+  font-weight: 600;
+  margin: 0;
+}
+
+.photoStack {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.photoBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thumbs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 12px;
+}
+
+.thumb {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.thumbState {
+  font-size: 13px;
+  color: var(--mad-muted);
+}
+
+.thumb[data-status='error'] .thumbState {
+  color: var(--mad-danger);
+}
+
+.errorText {
+  color: var(--mad-danger);
+  font-size: 14px;
+  margin: 0;
+}
+
+.links {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend {
+  font-weight: 500;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.optional {
+  color: var(--mad-muted);
+  font-weight: 400;
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+.linkRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.linkRow > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.formError {
+  margin-top: 8px;
+}
+
+.submitRow {
+  display: flex;
+}
+
+.submitRow > * {
+  width: 100%;
+}
+
+@media (min-width: 720px) {
+  .submitRow > * {
+    width: auto;
+  }
+}

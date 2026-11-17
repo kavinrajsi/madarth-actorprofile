@@ -1,0 +1,167 @@
+import Link from 'next/link';
+import {notFound} from 'next/navigation';
+import {Gallery} from '@/components/admin/Gallery';
+import {NotesEditor} from '@/components/admin/NotesEditor';
+import {StatusBadge} from '@/components/admin/StatusBadge';
+import {StatusControl} from '@/components/admin/StatusControl';
+import {requireAdmin} from '@/lib/authz';
+import {GENDER_LABEL, STATUS_LABEL} from '@/lib/constants';
+import {getActorByCode} from '@/lib/queries';
+import {whatsappLink} from '@/lib/text';
+import styles from '@/components/admin/admin.module.css';
+
+const dt = new Intl.DateTimeFormat('en-IN', {dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'});
+
+function Item({label, children}: {label: string; children: React.ReactNode}) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{children || '—'}</dd>
+    </div>
+  );
+}
+
+function Ext({href}: {href: string}) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer noopener">
+      {href.replace(/^https?:\/\//, '')}
+    </a>
+  );
+}
+
+export default async function ActorPage({params}: {params: Promise<{code: string}>}) {
+  await requireAdmin();
+  const {code} = await params;
+  const data = await getActorByCode(decodeURIComponent(code));
+  if (!data) notFound();
+  const {actor: a, photos, history} = data;
+
+  return (
+    <>
+      <div>
+        <Link href="/admin" style={{color: 'var(--mad-muted)', fontSize: 14}}>
+          ← All profiles
+        </Link>
+      </div>
+      <div className={styles.pageHead}>
+        <div>
+          <span className="mad-eyebrow">{a.actorCode}</span>
+          <h1 className={styles.title}>{a.fullName}</h1>
+          <div className={styles.row} style={{marginTop: 8}}>
+            <StatusBadge status={a.status} />
+            {a.possibleDuplicate && <span className={styles.dup}>Possible duplicate</span>}
+            <span className={styles.meta}>Submitted {dt.format(a.createdAt)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.profile}>
+        <div>
+          <Gallery photos={photos} name={a.fullName} />
+        </div>
+
+        <div style={{display: 'flex', flexDirection: 'column', gap: 24}}>
+          <section className={styles.panel} aria-label="Casting status">
+            <StatusControl actorId={a.id} status={a.status} />
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Contact</h2>
+            <dl className={styles.dl}>
+              <Item label="Contact number">
+                <a href={`tel:${a.phone}`}>{a.phone}</a>
+              </Item>
+              <Item label="WhatsApp">
+                <a href={whatsappLink(a.whatsapp)} target="_blank" rel="noreferrer">
+                  {a.whatsapp}
+                </a>
+              </Item>
+              <Item label="Email">
+                <a href={`mailto:${a.email}`}>{a.email}</a>
+              </Item>
+              <Item label="Instagram">
+                {a.instagramUrl ? (
+                  <a href={a.instagramUrl} target="_blank" rel="noreferrer noopener">
+                    {a.instagramHandle ? `@${a.instagramHandle}` : a.instagramUrl}
+                  </a>
+                ) : null}
+              </Item>
+              {a.guardianName && (
+                <>
+                  <Item label="Parent / guardian">{a.guardianName}</Item>
+                  <Item label="Guardian phone">
+                    {a.guardianPhone && <a href={`tel:${a.guardianPhone}`}>{a.guardianPhone}</a>}
+                  </Item>
+                </>
+              )}
+            </dl>
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Basic details</h2>
+            <dl className={styles.dl}>
+              <Item label="Age at submission">{a.age}</Item>
+              <Item label="Gender">{GENDER_LABEL[a.gender]}</Item>
+              <Item label="City">{a.city}</Item>
+              <Item label="Height">{a.heightCm ? `${a.heightCm} cm` : null}</Item>
+              <Item label="Languages">{a.languages.join(', ')}</Item>
+              <Item label="Current profession">{a.profession}</Item>
+              <Item label="Availability">{a.availability}</Item>
+              <Item label="Willing to travel">{a.willingToTravel ? 'Yes' : 'No'}</Item>
+            </dl>
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Introduction</h2>
+            <p className={styles.prose}>{a.intro}</p>
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Acting experience</h2>
+            <p className={styles.prose}>{a.experience || '—'}</p>
+            {a.showreelUrl && (
+              <dl className={styles.dl}>
+                <Item label="Showreel / audition video">
+                  <Ext href={a.showreelUrl} />
+                </Item>
+              </dl>
+            )}
+            {a.portfolioLinks.length > 0 && (
+              <>
+                <h3 style={{fontSize: 15, margin: 0, color: 'var(--mad-muted)', fontWeight: 400}}>Portfolio links</h3>
+                <ul className={styles.linkList}>
+                  {a.portfolioLinks.map((l) => (
+                    <li key={l}>
+                      <Ext href={l} />
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Internal notes</h2>
+            <NotesEditor actorId={a.id} initial={a.notes ?? ''} />
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>History</h2>
+            <ul className={styles.history}>
+              {history.map((h) => (
+                <li key={h.id}>
+                  {dt.format(h.at)}: {h.fromStatus ? STATUS_LABEL[h.fromStatus] : '—'} → {STATUS_LABEL[h.toStatus]} by{' '}
+                  {h.byEmail}
+                </li>
+              ))}
+              <li>
+                {dt.format(a.createdAt)}: Profile submitted. Consent given ({a.consentVersion})
+                {a.guardianConsent ? ', with parent/guardian consent' : ''}.
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
