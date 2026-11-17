@@ -14,6 +14,8 @@ export type UploadMode = 'token' | 'presigned';
 
 export type UploadItem = {
   localId: string;
+  /** Set for a photo already saved on the profile (edit mode). */
+  id?: string;
   kind: PhotoKind;
   previewUrl: string;
   status: 'uploading' | 'done' | 'error';

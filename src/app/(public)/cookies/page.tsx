@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 const sections = [
   {id: 'summary', title: 'In short'},
   {id: 'public', title: 'Registration form'},
+  {id: 'actor', title: 'Actor account'},
   {id: 'admin', title: 'Casting team dashboard'},
   {id: 'manage', title: 'Managing cookies'},
   {id: 'contact', title: 'Contact'},
@@ -20,8 +21,8 @@ export default function CookiesPage() {
     <LegalPage title="Cookie Policy" sections={sections}>
       <Section id="summary" title="In short">
         <p>
-          This site uses no advertising or analytics cookies. The only cookies are the ones needed for our casting
-          team to sign in.
+          This site uses no advertising or analytics cookies. The only cookies are the ones needed to sign in: to your
+          actor account, or for our casting team to the dashboard.
         </p>
       </Section>
 
@@ -29,6 +30,13 @@ export default function CookiesPage() {
         <p>
           The registration form and policy pages do not set cookies. Your form entries stay in your browser until you
           submit them. Photos you add are uploaded directly to our private storage.
+        </p>
+      </Section>
+
+      <Section id="actor" title="Actor account">
+        <p>
+          When you sign in to your actor account, we set one strictly necessary cookie that keeps you signed in for up to
+          7 days. It holds a signed reference to your account, not your details, and is removed when you sign out.
         </p>
       </Section>
 
@@ -50,8 +58,8 @@ export default function CookiesPage() {
 
       <Section id="manage" title="Managing cookies">
         <p>
-          You can clear or block cookies in your browser settings. Blocking them does not affect the registration form;
-          staff will not be able to sign in to the dashboard.
+          You can clear or block cookies in your browser settings. Blocking them does not affect the registration form,
+          but you will not be able to sign in to your actor account (and staff cannot sign in to the dashboard).
         </p>
       </Section>
 

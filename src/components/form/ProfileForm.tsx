@@ -13,6 +13,7 @@ import {Selector} from '@astryxdesign/core/Selector';
 import {TextArea} from '@astryxdesign/core/TextArea';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {submitProfile} from '@/app/(public)/actions';
+import {updateProfileAction} from '@/app/account/actions';
 import {
   CONSENT_TEXT,
   GENDER_OPTIONS,
@@ -26,6 +27,8 @@ import {fieldErrors, submissionSchema, type SubmissionInput} from '@/lib/validat
 import {LinkList} from './LinkList';
 import {PhotoUploader, type UploadItem, type UploadMode} from './PhotoUploader';
 import styles from './form.module.css';
+
+export type ProfileFormState = State;
 
 type State = {
   fullName: string;
@@ -57,7 +60,7 @@ type State = {
   website: string;
 };
 
-const initial: State = {
+export const emptyProfileState: State = {
   fullName: '',
   dateOfBirth: '',
   gender: '',
@@ -105,13 +108,21 @@ function SectionHead({n, title, text}: {n: string; title: string; text?: string}
   );
 }
 
-export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
+type EditProps = {
+  /** Actor ID of the profile being edited. */
+  code: string;
+  initial: State;
+  photos: UploadItem[];
+};
+
+export function ProfileForm({uploadMode, edit}: {uploadMode: UploadMode; edit?: EditProps}) {
+  const isEdit = Boolean(edit);
   const router = useRouter();
   // Created on first use (not during render) so the page can be prerendered.
   const draftRef = useRef<string | null>(null);
   const getDraftId = useCallback(() => (draftRef.current ??= crypto.randomUUID()), []);
-  const [s, setS] = useState<State>(initial);
-  const [photos, setPhotos] = useState<UploadItem[]>([]);
+  const [s, setS] = useState<State>(edit?.initial ?? emptyProfileState);
+  const [photos, setPhotos] = useState<UploadItem[]>(edit?.photos ?? []);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -152,7 +163,7 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       otherSocialLinks: s.otherSocialLinks.map((l) => l.trim()).filter(Boolean),
       photos: photos
         .filter((p) => p.status === 'done' && p.pathname)
-        .map((p) => ({kind: p.kind, pathname: p.pathname!, contentType: p.contentType, size: p.size})),
+        .map((p) => ({id: p.id, kind: p.kind, pathname: p.pathname!, contentType: p.contentType, size: p.size})),
       intro: s.intro,
       experience: s.experience,
       portfolioLinks: s.portfolioLinks.map((l) => l.trim()).filter(Boolean),
@@ -162,7 +173,8 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       profession: s.profession,
       availability: s.availability,
       willingToTravel: s.willingToTravel as 'yes' | 'no',
-      consent: s.consent as true,
+      // Consent was given at registration; editing keeps it.
+      consent: (isEdit || s.consent) as true,
       website: s.website,
     };
   }
@@ -192,6 +204,18 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       return;
     }
     startTransition(async () => {
+      if (edit) {
+        const res = await updateProfileAction(edit.code, input);
+        if (res.ok) {
+          router.push(`/account?saved=${encodeURIComponent(edit.code)}`);
+          router.refresh();
+        } else {
+          setErrors(res.fieldErrors ?? {});
+          setFormError(res.message);
+          focusFirstError();
+        }
+        return;
+      }
       const res = await submitProfile(input);
       if (res.ok) {
         router.push(`/submitted/${encodeURIComponent(res.code)}`);
@@ -280,6 +304,8 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             type="email"
             value={s.email}
             onChange={(v) => set('email', v)}
+            isReadOnly={isEdit}
+            description={isEdit ? 'This is your login email. Change it from your account page.' : undefined}
             isRequired
             autoComplete="email"
             status={err(errors.email)}
@@ -573,7 +599,9 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       </section>
 
       {/* Consent + submit */}
-      <section className={styles.section} aria-label="Consent">
+      <section className={styles.section} aria-label={isEdit ? 'Save' : 'Consent'}>
+        {!isEdit && (
+        <>
         <div data-has-error={errors.consent ? 'true' : undefined}>
           <CheckboxInput
             label={`${CONSENT_TEXT} *`}
@@ -597,6 +625,8 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
           </a>
           . Links open in a new tab, so your form stays filled in.
         </p>
+        </>
+        )}
         {formError && (
           <div className={styles.formError}>
             <Banner status="error" title={formError} />
@@ -607,7 +637,7 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             type="submit"
             variant="primary"
             size="lg"
-            label={uploading ? 'Waiting for photos…' : 'Submit profile'}
+            label={uploading ? 'Waiting for photos…' : isEdit ? 'Save changes' : 'Submit profile'}
             isLoading={isPending}
             isDisabled={isPending}
           />

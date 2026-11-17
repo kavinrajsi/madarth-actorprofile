@@ -21,6 +21,7 @@ export function SiteFooter() {
     <footer className={styles.footer}>
       <div className={`mad-container ${styles.footerInner}`}>
         <nav aria-label="Policies" className={styles.footerNav}>
+          <Link href="/account/login">Actor sign in</Link>
           {POLICY_LINKS.map((l) => (
             <Link key={l.href} href={l.href}>
               {l.label}

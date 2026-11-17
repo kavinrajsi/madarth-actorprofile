@@ -8,6 +8,7 @@ import {getDb, schema} from '@/db';
 import {statusEnum} from '@/db/schema-enums';
 import {requireAdmin, requireSuperAdmin} from '@/lib/authz';
 import {superAdminEmails} from '@/lib/roles';
+import {ensureAccount, sendSetupInvite} from '@/lib/account/service';
 
 type Result = {ok: true} | {ok: false; message: string};
 
@@ -77,4 +78,20 @@ export async function removeMember(email: string): Promise<Result> {
 
 export async function signOutAction() {
   await signOut({redirectTo: '/login'});
+}
+
+export async function resendInviteAction(actorId: string): Promise<Result> {
+  await requireAdmin();
+  if (!z.uuid().safeParse(actorId).success) return {ok: false, message: 'Invalid profile'};
+  const [actor] = await getDb()
+    .select({id: schema.actors.id, email: schema.actors.email, name: schema.actors.fullName, code: schema.actors.actorCode})
+    .from(schema.actors)
+    .where(eq(schema.actors.id, actorId))
+    .limit(1);
+  if (!actor) return {ok: false, message: 'Profile not found'};
+  const account = await ensureAccount(actor.email);
+  if (account.passwordHash) return {ok: false, message: 'This actor has already set up their account.'};
+  const res = await sendSetupInvite(account, actor.name.split(' ')[0] || actor.name, actor.id);
+  revalidatePath(`/admin/actors/${actor.code}`);
+  return res.status === 'sent' ? {ok: true} : {ok: false, message: `Email not sent (${res.error})`};
 }

@@ -1,14 +1,14 @@
 'use server';
 
 import {randomUUID} from 'node:crypto';
-import {head} from '@vercel/blob';
+import {after} from 'next/server';
 import {eq, or, sql} from 'drizzle-orm';
 import {getDb, schema} from '@/db';
-import {isPathInDraft} from '@/lib/blob-paths';
-import {ageFromDob} from '@/lib/age';
+import {sendRegistrationEmails} from '@/lib/account/service';
+import {checkNewPhoto, PHOTO_ORDER, profileFields} from '@/lib/actor-fields';
 import {CONSENT_VERSION} from '@/lib/constants';
+import {safeError} from '@/lib/log';
 import {rateLimit} from '@/lib/rate-limit';
-import {clean, instagramHandle, normalizeCity, normalizePhone, titleCase} from '@/lib/text';
 import {fieldErrors, submissionSchema, type SubmissionInput} from '@/lib/validation';
 
 export type SubmitResult =
@@ -22,69 +22,31 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
   }
   const v = parsed.data;
 
-  if (!(await rateLimit('submit', 5, 3600))) {
+  if (!(await rateLimit('submit', 20, 3600))) {
     return {ok: false, message: 'Too many submissions from this network. Please try again in an hour.'};
   }
 
   // Every photo must be a real private blob uploaded into this draft's folder.
   for (const p of v.photos) {
-    if (!isPathInDraft(p.pathname, v.draftId)) {
-      return {ok: false, message: 'One of the photos is invalid. Please upload it again.'};
-    }
-    try {
-      const meta = await head(p.pathname);
-      if (meta.pathname !== p.pathname || meta.size !== p.size) {
-        return {ok: false, message: 'One of the photos is invalid. Please upload it again.'};
-      }
-    } catch {
-      return {ok: false, message: 'One of the photos could not be found. Please upload it again.'};
-    }
+    const problem = await checkNewPhoto(p, v.draftId);
+    if (problem) return {ok: false, message: problem};
   }
 
   const db = getDb();
-  const phone = normalizePhone(v.phone);
-  const whatsapp = normalizePhone(v.whatsapp);
-
+  const fields = profileFields(v);
   const existing = await db
     .select({id: schema.actors.id})
     .from(schema.actors)
-    .where(or(sql`lower(${schema.actors.email}) = ${v.email}`, eq(schema.actors.phone, phone)))
+    .where(or(sql`lower(${schema.actors.email}) = ${v.email}`, eq(schema.actors.phone, fields.phone)))
     .limit(1);
 
-  const handle = v.instagramHandle ? instagramHandle(v.instagramHandle) : undefined;
-  const isMinor = (ageFromDob(v.dateOfBirth) ?? 99) < 18;
   const actorId = randomUUID();
-  const languages = [...new Set(v.languages.map(titleCase))];
-
   const insertActor = db
     .insert(schema.actors)
     .values({
       id: actorId,
-      fullName: clean(v.fullName),
-      dateOfBirth: v.dateOfBirth,
-      gender: v.gender,
-      city: titleCase(v.city),
-      cityNormalized: normalizeCity(v.city),
-      phone,
-      whatsapp,
+      ...fields,
       email: v.email,
-      guardianName: isMinor ? v.guardianName : null,
-      guardianPhone: isMinor && v.guardianPhone ? normalizePhone(v.guardianPhone) : null,
-      guardianConsent: isMinor ? true : null,
-      instagramHandle: handle ?? null,
-      instagramUrl: v.instagramUrl ?? (handle ? `https://instagram.com/${handle}` : null),
-      youtubeUrl: v.youtubeUrl ?? null,
-      facebookUrl: v.facebookUrl ?? null,
-      otherSocialLinks: v.otherSocialLinks,
-      intro: v.intro,
-      experience: v.experience ?? null,
-      portfolioLinks: v.portfolioLinks,
-      showreelUrls: v.showreelUrls,
-      languages,
-      heightCm: v.heightCm ?? null,
-      profession: v.profession ?? null,
-      availability: v.availability ?? null,
-      willingToTravel: v.willingToTravel === 'yes',
       consent: true,
       consentAt: new Date(),
       consentVersion: CONSENT_VERSION,
@@ -92,9 +54,8 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
     })
     .returning({code: schema.actors.actorCode});
 
-  const order = {headshot: 0, full_length: 1, gallery: 2} as const;
   const photos = [...v.photos]
-    .sort((a, b) => order[a.kind] - order[b.kind])
+    .sort((a, b) => PHOTO_ORDER[a.kind] - PHOTO_ORDER[b.kind])
     .map((p, i) => ({
       actorId,
       kind: p.kind,
@@ -111,9 +72,11 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
       : [await insertActor];
     const code = inserted[0]?.code;
     if (!code) throw new Error('No actor code returned');
+    // 1) thank-you email, 2) account invitation, sent after the response is returned.
+    after(() => sendRegistrationEmails(actorId));
     return {ok: true, code};
   } catch (err) {
-    console.error('submitProfile failed', err);
+    console.error('submitProfile failed:', safeError(err));
     return {ok: false, message: 'Something went wrong while saving your profile. Please try again.'};
   }
 }

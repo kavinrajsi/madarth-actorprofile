@@ -3,10 +3,14 @@ import {notFound} from 'next/navigation';
 import {Gallery} from '@/components/admin/Gallery';
 import {NotesEditor} from '@/components/admin/NotesEditor';
 import {StatusBadge} from '@/components/admin/StatusBadge';
+import {ResendInvite} from '@/components/admin/ResendInvite';
 import {StatusControl} from '@/components/admin/StatusControl';
 import {requireAdmin} from '@/lib/authz';
 import {GENDER_LABEL, STATUS_LABEL} from '@/lib/constants';
 import {getActorByCode} from '@/lib/queries';
+import {findAccountByEmail} from '@/lib/account/service';
+import {desc, eq} from 'drizzle-orm';
+import {getDb, schema} from '@/db';
 import {whatsappLink} from '@/lib/text';
 import {ageFromDob} from '@/lib/age';
 import styles from '@/components/admin/admin.module.css';
@@ -37,6 +41,16 @@ export default async function ActorPage({params}: {params: Promise<{code: string
   const data = await getActorByCode(decodeURIComponent(code));
   if (!data) notFound();
   const {actor: a, photos, history} = data;
+  const [account, emails] = await Promise.all([
+    findAccountByEmail(a.email),
+    getDb()
+      .select()
+      .from(schema.emailEvents)
+      .where(eq(schema.emailEvents.actorId, a.id))
+      .orderBy(desc(schema.emailEvents.at))
+      .limit(20),
+  ]);
+  const EMAIL_LABEL = {thank_you: 'Thank-you', invite: 'Account invite', password_reset: 'Password reset', email_change: 'Email change'} as const;
 
   return (
     <>
@@ -161,6 +175,25 @@ export default async function ActorPage({params}: {params: Promise<{code: string
           <section className={styles.panel}>
             <h2 className={styles.panelTitle}>Internal notes</h2>
             <NotesEditor actorId={a.id} initial={a.notes ?? ''} />
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Actor account &amp; emails</h2>
+            <p className={styles.meta}>
+              {account?.passwordHash
+                ? `Account active${account.lastLoginAt ? `, last sign-in ${dt.format(account.lastLoginAt)}` : ''}.`
+                : 'Account not set up yet (actor has not created a password).'}
+            </p>
+            {!account?.passwordHash && <ResendInvite actorId={a.id} />}
+            <ul className={styles.history}>
+              {emails.length === 0 && <li>No emails sent yet.</li>}
+              {emails.map((e) => (
+                <li key={e.id}>
+                  {dt.format(e.at)}: {EMAIL_LABEL[e.kind]}: {e.status}
+                  {e.error ? ` (${e.error})` : ''}
+                </li>
+              ))}
+            </ul>
           </section>
 
           <section className={styles.panel}>

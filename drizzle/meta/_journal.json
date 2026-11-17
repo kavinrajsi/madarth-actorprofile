@@ -22,6 +22,13 @@
       "when": 1794903711725,
       "tag": "0002_drop_showreel_url",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794907069580,
+      "tag": "0003_actor_accounts",
+      "breakpoints": true
     }
   ]
 }

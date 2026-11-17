@@ -14,6 +14,7 @@ const sections = [
   {id: 'eligibility', title: 'Who can register'},
   {id: 'your-info', title: 'Your information'},
   {id: 'your-content', title: 'Your photos and links'},
+  {id: 'account', title: 'Your account'},
   {id: 'no-guarantee', title: 'No guarantee of selection'},
   {id: 'acceptable-use', title: 'Acceptable use'},
   {id: 'removal', title: 'Removing profiles'},
@@ -70,6 +71,14 @@ export default function TermsPage() {
             our <Link href="/photo-consent">Photo &amp; Consent Policy</Link>.
           </li>
         </ul>
+      </Section>
+
+      <Section id="account" title="Your account">
+        <p>
+          After you register we email you a link to create a password for your actor account. Keep your password
+          private; you are responsible for activity on your account. If you think someone else has access, reset your
+          password straight away and tell us at <Email />.
+        </p>
       </Section>
 
       <Section id="no-guarantee" title="No guarantee of selection">

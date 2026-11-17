@@ -60,6 +60,8 @@ const socialUrl = (label: string, domains: string[]) =>
 
 
 export const photoSchema = z.object({
+  /** Set for a photo already saved on the profile (edit mode); absent for a new upload. */
+  id: z.uuid().optional(),
   kind: z.enum(photoKindEnum),
   pathname: z.string().min(1).max(500),
   contentType: z.string().refine((v) => PHOTO_ACCEPT.includes(v), 'Unsupported image type'),

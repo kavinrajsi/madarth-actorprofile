@@ -52,6 +52,10 @@ export default function PrivacyPage() {
           <li>Acting details: introduction, previous experience, portfolio and showreel links.</li>
           <li>Additional details: languages, height, current profession, availability and willingness to travel.</li>
           <li>For actors under 18: the name, phone number and consent of a parent or legal guardian.</li>
+          <li>
+            Your actor account: your login email and a password, which we store only as a one-way scrambled hash (we
+            can&apos;t see it).
+          </li>
         </ul>
         <h3>Information collected automatically</h3>
         <ul>
@@ -60,6 +64,7 @@ export default function PrivacyPage() {
             submissions. We do not store your actual IP address.
           </li>
           <li>The date and time of your submission and the version of the consent you agreed to.</li>
+          <li>A record of which emails we sent you (type, date and delivery status, not the content).</li>
         </ul>
         <p>We do not use analytics or advertising trackers on the registration form.</p>
       </Section>
@@ -68,6 +73,7 @@ export default function PrivacyPage() {
         <ul>
           <li>To review your profile for current and future casting requirements: films, ads, campaigns and other productions.</li>
           <li>To contact you about auditions or roles by phone, WhatsApp or email.</li>
+          <li>To send you account emails: a registration thank-you, your account invitation, password resets and email changes.</li>
           <li>To keep an organised talent database so the casting team can search and shortlist actors.</li>
           <li>To prevent spam, fraud and duplicate profiles.</li>
         </ul>
@@ -94,7 +100,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Service providers who store and process data for us</strong>: Vercel (website hosting and photo
-            storage), Neon (database) and Google (sign-in for our staff). They act on our instructions and may not use
+            storage), Neon (database), Zoho ZeptoMail (sending account emails) and Google (sign-in for our staff). They act on our instructions and may not use
             your data for their own purposes.
           </li>
           <li>
@@ -124,6 +130,7 @@ export default function PrivacyPage() {
           <li>Photographs are kept in private storage and can only be viewed by signed-in casting staff.</li>
           <li>Dashboard access is limited to approved Madarth accounts and can be removed at any time.</li>
           <li>All data travels over encrypted (HTTPS) connections.</li>
+          <li>Account passwords are stored only as salted one-way hashes; sign-in links work once and expire.</li>
         </ul>
         <p>No system is perfectly secure, but we take reasonable steps to protect your data and will tell you and the authorities about a breach as the law requires.</p>
       </Section>
@@ -138,8 +145,10 @@ export default function PrivacyPage() {
           <li>nominate someone to exercise these rights for you if you die or become unable to do so.</li>
         </ul>
         <p>
-          Email <Email /> from the email address on your profile, and include your actor registration ID if you have
-          it. We will reply within {LEGAL.withdrawalDays} days.
+          You can update or delete your profile yourself after signing in to your{' '}
+          <Link href="/account/login">actor account</Link>. For anything else, email <Email /> from the email address on
+          your profile, and include your actor registration ID if you have it. We will reply within{' '}
+          {LEGAL.withdrawalDays} days.
         </p>
       </Section>
 

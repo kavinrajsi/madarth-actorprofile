@@ -19,6 +19,10 @@ export const statusEnum = pgEnum('actor_status', E.statusEnum);
 
 export const photoKindEnum = pgEnum('photo_kind', E.photoKindEnum);
 
+export const tokenPurposeEnum = pgEnum('token_purpose', E.tokenPurposeEnum);
+
+export const emailKindEnum = pgEnum('email_kind', E.emailKindEnum);
+
 export const actorCodeSeq = pgSequence('actor_code_seq', {startWith: 1, increment: 1});
 
 export const actors = pgTable(
@@ -144,7 +148,59 @@ export const rateEvents = pgTable(
   (t) => [index('rate_events_key_at_idx').on(t.key, t.at)],
 );
 
+/**
+ * Actor login account. One per email address; it gives access to every profile submitted with
+ * that email (actors.email). Created on first submission; password is set from the invite link.
+ */
+export const actorAccounts = pgTable('actor_accounts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  /** Always lowercased. */
+  email: text('email').notNull().unique(),
+  /** scrypt hash; null until the actor completes setup. */
+  passwordHash: text('password_hash'),
+  /** Bumped on password change / logout-everywhere to invalidate existing sessions. */
+  sessionVersion: integer('session_version').notNull().default(1),
+  passwordSetAt: timestamp('password_set_at', {withTimezone: true}),
+  lastLoginAt: timestamp('last_login_at', {withTimezone: true}),
+  createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
+});
+
+/** One-time links (account setup, password reset, email change). Only a SHA-256 hash is stored. */
+export const accountTokens = pgTable(
+  'account_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => actorAccounts.id, {onDelete: 'cascade'}),
+    purpose: tokenPurposeEnum('purpose').notNull(),
+    tokenHash: text('token_hash').notNull().unique(),
+    /** For email_change: the address being confirmed. */
+    newEmail: text('new_email'),
+    expiresAt: timestamp('expires_at', {withTimezone: true}).notNull(),
+    usedAt: timestamp('used_at', {withTimezone: true}),
+    createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
+  },
+  (t) => [index('account_tokens_account_idx').on(t.accountId, t.purpose)],
+);
+
+/** Delivery log for transactional email (no message bodies stored). */
+export const emailEvents = pgTable(
+  'email_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    actorId: uuid('actor_id').references(() => actors.id, {onDelete: 'set null'}),
+    kind: emailKindEnum('kind').notNull(),
+    status: text('status').notNull(),
+    providerId: text('provider_id'),
+    error: text('error'),
+    at: timestamp('at', {withTimezone: true}).notNull().defaultNow(),
+  },
+  (t) => [index('email_events_actor_idx').on(t.actorId, t.at)],
+);
+
 export type Actor = typeof actors.$inferSelect;
+export type ActorAccount = typeof actorAccounts.$inferSelect;
 export type ActorPhoto = typeof actorPhotos.$inferSelect;
 export type ActorStatus = (typeof E.statusEnum)[number];
 export type Gender = (typeof E.genderEnum)[number];
