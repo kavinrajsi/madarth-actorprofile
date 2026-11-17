@@ -12,7 +12,7 @@ const sections = [
   {id: 'public', title: 'Registration form'},
   {id: 'analytics', title: 'Analytics cookies'},
   {id: 'actor', title: 'Actor account'},
-  {id: 'admin', title: 'Casting team dashboard'},
+  {id: 'staff', title: 'Staff sign-in'},
   {id: 'manage', title: 'Managing cookies'},
   {id: 'contact', title: 'Contact'},
 ];
@@ -22,72 +22,69 @@ export default function CookiesPage() {
     <LegalPage title="Cookie Policy" sections={sections}>
       <Section id="summary" title="In short">
         <p>
-          On casting.madarth.com we use analytics cookies from Google Analytics and Microsoft Clarity to understand how
-          the site is used. We use no advertising cookies. Sign-in cookies keep you signed in to your actor account or
-          the casting team dashboard.
+          casting.madarth.com uses analytics cookies from Google Analytics and Microsoft Clarity to see how the site is
+          used. We don&apos;t use advertising cookies. Sign-in cookies keep you signed in to your actor account.
         </p>
       </Section>
 
       <Section id="public" title="Registration form">
         <p>
-          The registration form itself does not need cookies. Photos you add are uploaded directly to our private
-          storage. On casting.madarth.com, the analytics cookies below are set when the page loads.
+          The registration form doesn&apos;t need cookies to work. Photos you add go straight to our private storage. On
+          casting.madarth.com, the analytics cookies below are set when the page loads.
         </p>
       </Section>
 
       <Section id="analytics" title="Analytics cookies">
-        <p>Loaded through Google Tag Manager, only on casting.madarth.com:</p>
+        <p>These load through Google Tag Manager, and only on casting.madarth.com.</p>
         <ul>
           <li>
-            <strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_*</code>): count visits and pages viewed;
-            kept for up to 2 years.
+            Google Analytics sets <code>_ga</code> and <code>_ga_*</code> to count visits and pages viewed. They last up
+            to 2 years.
           </li>
           <li>
-            <strong>Microsoft Clarity</strong> (<code>_clck</code>, <code>_clsk</code>, and Microsoft&apos;s{' '}
-            <code>MUID</code>, <code>CLID</code>): link page views into a session for heatmaps and session recordings;
-            kept from 1 day up to 1 year.
+            Microsoft Clarity sets <code>_clck</code> and <code>_clsk</code>, plus Microsoft&apos;s <code>MUID</code>{' '}
+            and <code>CLID</code>, to tie page views into one visit for heatmaps and session recordings. They last
+            anywhere from 1 day to 1 year.
           </li>
         </ul>
         <p>
-          Session recordings can include text you type into forms (not passwords). See our{' '}
-          <Link href="/privacy">Privacy Policy</Link> for details.
+          Session recordings can include what you type into forms, but never passwords. Our{' '}
+          <Link href="/privacy">Privacy Policy</Link> has the details.
         </p>
       </Section>
 
       <Section id="actor" title="Actor account">
         <p>
-          When you sign in to your actor account, we set one strictly necessary cookie that keeps you signed in for up to
-          7 days. It holds a signed reference to your account, not your details, and is removed when you sign out.
+          When you sign in, we set a cookie that keeps you signed in for up to 7 days. It holds a signed reference to
+          your account, not your details, and it&apos;s removed when you sign out.
         </p>
+        <p>
+          Two short-lived cookies help with two-step sign-in. One remembers that you&apos;ve entered your password while
+          you enter your code, and expires after 10 minutes. The other holds a one-time check while you use a passkey,
+          and expires after 5 minutes.
+        </p>
+        <p>All three are strictly necessary. You can&apos;t sign in without them.</p>
       </Section>
 
-      <Section id="admin" title="Casting team dashboard">
-        <p>When a Madarth staff member signs in with Google, these strictly necessary cookies are set:</p>
-        <ul>
-          <li>
-            <strong>Session cookie</strong>: keeps the staff member signed in (up to 7 days).
-          </li>
-          <li>
-            <strong>Security (CSRF) cookie</strong>: protects the sign-in from forged requests.
-          </li>
-          <li>
-            <strong>Callback cookie</strong>: remembers which page to return to after sign-in.
-          </li>
-        </ul>
-        <p>Google may set its own cookies during sign-in, under Google&apos;s privacy policy.</p>
+      <Section id="staff" title="Staff sign-in">
+        <p>
+          Madarth staff sign in with Google. That sets strictly necessary cookies of its own: one keeps them signed in
+          for up to 7 days, one protects the sign-in from forged requests, and one remembers which page to return to.
+          Google may also set its own cookies during sign-in, under Google&apos;s privacy policy.
+        </p>
       </Section>
 
       <Section id="manage" title="Managing cookies">
         <p>
-          You can clear or block cookies in your browser settings. Blocking analytics cookies does not affect the
-          registration form. Blocking all cookies means you will not be able to sign in to your actor account (and staff
-          cannot sign in to the dashboard). You can also install Google&apos;s Analytics opt-out browser add-on.
+          You can clear or block cookies in your browser settings. Blocking analytics cookies doesn&apos;t affect the
+          registration form. If you block all cookies, you won&apos;t be able to sign in to your actor account. You can
+          also install Google&apos;s Analytics opt-out add-on for your browser.
         </p>
       </Section>
 
       <Section id="contact" title="Contact">
         <p>
-          Questions: <Email />. See also our <Link href="/privacy">Privacy Policy</Link>.
+          Questions? Email <Email />. You can also read our <Link href="/privacy">Privacy Policy</Link>.
         </p>
       </Section>
     </LegalPage>

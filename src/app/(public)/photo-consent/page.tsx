@@ -26,8 +26,8 @@ export default function PhotoConsentPage() {
       sections={sections}
       intro={
         <p>
-          Your photographs are personal. This page explains exactly what the consent box on our registration form
-          allows us to do with them, and what it does not.
+          This page sets out what the consent box on our registration form lets us do with your photos, and what it
+          doesn&apos;t.
         </p>
       }
     >
@@ -40,56 +40,53 @@ export default function PhotoConsentPage() {
 
       <Section id="covers" title="What the consent covers">
         <ul>
-          <li>Storing your photographs and details privately in our casting database.</li>
-          <li>Our casting team viewing, searching and shortlisting your profile.</li>
+          <li>We store your photos and details privately in our casting database.</li>
+          <li>Our casting team can view, search and shortlist your profile.</li>
           <li>
-            Sharing your profile and photographs with the director, client or production partners of a specific project
-            you are being considered for, only for that casting decision.
+            When you&apos;re being considered for a particular project, we can share your profile and photos with its
+            director, client or production partners, for that casting decision only.
           </li>
-          <li>Contacting you about auditions and roles.</li>
+          <li>We can contact you about auditions and roles.</li>
         </ul>
       </Section>
 
       <Section id="not-covered" title="What it does not cover">
         <ul>
+          <li>We won&apos;t publish your photos on our website, on social media, in ads or anywhere else public.</li>
           <li>
-            We will <strong>not</strong> publish your photographs on our website, social media, advertising or any
-            public place.
+            We won&apos;t put your photos in an ad, film or campaign. If you&apos;re cast, any use like that is agreed
+            separately in writing, including what you&apos;ll be paid.
           </li>
-          <li>
-            We will <strong>not</strong> use your photographs in an ad, film or campaign. If you are cast, that use will
-            be agreed separately in writing, including payment terms.
-          </li>
-          <li>We will not sell your photographs or give them to anyone for purposes other than casting.</li>
-          <li>We will not edit your photographs to change how you look.</li>
+          <li>We won&apos;t sell your photos or hand them to anyone for anything other than casting.</li>
+          <li>We won&apos;t edit your photos to change how you look.</li>
         </ul>
       </Section>
 
       <Section id="minors" title="Actors under 18">
-        <p>For an actor under 18, a parent or legal guardian must also agree to this statement on the form:</p>
+        <p>If the actor is under 18, a parent or legal guardian also has to agree to this statement on the form:</p>
         <div className={styles.callout}>
           <p>&ldquo;{GUARDIAN_CONSENT_TEXT}&rdquo;</p>
         </div>
-        <p>We contact the parent or guardian about any audition or role for a minor.</p>
+        <p>For any audition or role, we contact the parent or guardian, not the child.</p>
       </Section>
 
       <Section id="withdraw" title="Withdrawing consent">
         <p>
-          You can withdraw your consent at any time, without giving a reason. Email <Email /> from the email address on
-          your profile, with your actor registration ID if you have it. Within {LEGAL.withdrawalDays} days we will delete
-          your profile and every photograph you uploaded, and confirm by email.
+          You can withdraw your consent at any time, and you don&apos;t have to say why. The quickest way is to delete
+          your profile from your account. You can also email <Email /> from the address on your profile, with your Actor
+          ID if you have it. Within {LEGAL.withdrawalDays} days we&apos;ll delete your profile and every photo you
+          uploaded, and confirm by email.
         </p>
         <p>
-          If your profile was already shared with a project team before you withdrew, we will ask them to delete it
-          too.
+          If we had already shared your profile with a project team, we&apos;ll ask them to delete it too.
         </p>
       </Section>
 
       <Section id="records" title="How we record consent">
         <p>
-          We store the date and time you gave consent and the version of the wording you agreed to, so we can show
-          what you agreed to if it changes later. See our <Link href="/privacy">Privacy Policy</Link> for how long we
-          keep profiles.
+          We store the date and time you gave consent and the version of the wording you agreed to. If the wording
+          changes later, we can still show exactly what you agreed to. Our <Link href="/privacy">Privacy Policy</Link>{' '}
+          says how long we keep profiles.
         </p>
       </Section>
     </LegalPage>

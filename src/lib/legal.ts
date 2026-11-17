@@ -10,7 +10,7 @@ export const LEGAL = {
   privacyEmail: 'productions@madarth.com',
   retention: '2 years',
   withdrawalDays: 30,
-  lastUpdated: '17 November 2026',
+  lastUpdated: '18 November 2026',
   jurisdiction: 'Chennai, Tamil Nadu, India',
 } as const;
 

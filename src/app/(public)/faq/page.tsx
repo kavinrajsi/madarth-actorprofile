@@ -11,7 +11,7 @@ import styles from '@/components/legal/legal.module.css';
 
 export const metadata: Metadata = {
   title: 'Frequently asked questions',
-  description: 'Answers for actors registering with Madarth casting: photos, your account, two-step sign-in, status and privacy.',
+  description: 'Common questions from actors registering with Madarth casting: photos, signing in, casting status and privacy.',
 };
 
 const email = LEGAL.privacyEmail;
@@ -36,25 +36,25 @@ const groups: Group[] = [
     items: [
       {
         q: 'Does it cost anything to register?',
-        text: `No. ${LEGAL.companyName} never asks actors for money to register, audition, be shortlisted or get a role. If anyone claiming to be from ${LEGAL.companyName} asks you for a payment, do not pay and report it to ${email}.`,
+        text: `No. ${LEGAL.companyName} never asks actors for money to register, audition, be shortlisted or get a role. If someone claiming to be from ${LEGAL.companyName} asks you to pay, don't. Report it to ${email}.`,
         body: (
           <p>
             No. {LEGAL.companyName} never asks actors for money to register, audition, be shortlisted or get a role. If
-            anyone claiming to be from {LEGAL.companyName} asks you for a payment, do not pay and report it to <Email />.
+            someone claiming to be from {LEGAL.companyName} asks you to pay, don&apos;t. Report it to <Email />.
           </p>
         ),
       },
       {
         q: 'Who can register?',
-        text: 'Anyone can register. If the actor is under 18, a parent or legal guardian must fill in their own details and give consent on the form.',
+        text: 'Anyone. If the actor is under 18, a parent or legal guardian fills in their own details on the form and gives consent.',
       },
       {
         q: 'Can I register more than one person with the same email?',
-        text: 'Yes. A parent can register each child separately using the same email. All the profiles appear together when you sign in, and you can switch between them.',
+        text: 'Yes. A parent can register each child separately with the same email. When you sign in, all the profiles show up together and you can switch between them.',
       },
       {
         q: 'What happens after I submit?',
-        text: `You get an Actor ID (for example MAD-26-00001) on screen and by email. You will also get a separate email with a link to set your password, so you can sign in later to update your profile and see your casting status.`,
+        text: `You'll see your Actor ID (for example MAD-26-00001) on screen, and we email it to you. A second email has a link to set your password. Once that's done you can sign in, update your profile and check your casting status.`,
       },
     ],
   },
@@ -64,7 +64,7 @@ const groups: Group[] = [
     items: [
       {
         q: 'Which photos do I need?',
-        text: `One front-facing headshot is required. You can also add up to ${PHOTO_RULES.gallery.max} recent pictures and ${PHOTO_RULES.full_length.max} full-length photograph. More good photos help our casting team.`,
+        text: `One front-facing headshot is required. You can also add up to ${PHOTO_RULES.gallery.max} recent pictures and ${PHOTO_RULES.full_length.max} full-length photograph. The more good photos you add, the easier it is for our casting team to picture you in a role.`,
       },
       {
         q: 'What file types and sizes are allowed?',
@@ -72,7 +72,7 @@ const groups: Group[] = [
       },
       {
         q: 'Any tips for good photos?',
-        text: 'Use recent, clear photos in good light. Your face should be clearly visible, looking at the camera. Avoid sunglasses, filters, side profiles and heavily edited or blurry pictures.',
+        text: 'Use recent, clear photos taken in good light, with your face visible and looking at the camera. Skip sunglasses, filters, side profiles and anything heavily edited or blurry.',
       },
     ],
   },
@@ -103,15 +103,15 @@ const groups: Group[] = [
       },
       {
         q: 'Why do I need an authenticator app?',
-        text: 'Your profile holds your photos and contact details, so every account uses two-step sign-in. After your password, you enter a 6-digit code from an authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password. You set it up once by scanning a QR code.',
+        text: 'Your profile has your photos and phone number in it, so a password alone isn\'t enough. After your password, you type a 6-digit code from an authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password. You set the app up once by scanning a QR code.',
       },
       {
         q: 'What are backup codes?',
-        text: `When you turn on two-step sign-in you get ${BACKUP_CODE_COUNT} backup codes. Each one works once, in place of the app code, if you don't have your phone. Save them somewhere safe, such as a password manager or a printed copy. You can make a new set from My account at any time.`,
+        text: `When you turn on two-step sign-in you get ${BACKUP_CODE_COUNT} backup codes. If you don't have your phone, you can use one instead of the app code. Each works only once. Keep them somewhere safe, like a password manager or a printed copy. You can make a new set from My account whenever you need to.`,
       },
       {
         q: 'Can I sign in with my fingerprint or Face ID?',
-        text: 'Yes. After signing in, go to My account → Sign-in security and choose "Add passkey". Next time, after your password, you can use your fingerprint or Face ID instead of typing a code.',
+        text: 'Yes. Sign in, go to My account → Sign-in security and choose "Add passkey". From then on, after your password, you can use your fingerprint or Face ID instead of typing a code.',
       },
       {
         q: 'I lost my phone and my backup codes. How do I get back in?',
@@ -125,11 +125,11 @@ const groups: Group[] = [
       },
       {
         q: 'Can I change my login email?',
-        text: 'No. Your login email is fixed once you register. You can still update your phone and WhatsApp numbers from your profile.',
+        text: 'No. Your login email stays the same once you register. You can still change your phone and WhatsApp numbers in your profile.',
       },
       {
         q: 'What is "Recent activity" on my account?',
-        text: "It lists your recent sign-ins, failed sign-in attempts and changes to your account, with the device and approximate location. If you see something you don't recognise, reset your password straight away.",
+        text: "It's a list of recent sign-ins, failed sign-in attempts and changes to your account, with the device and rough location of each. If something there wasn't you, reset your password straight away.",
       },
     ],
   },
@@ -139,11 +139,11 @@ const groups: Group[] = [
     items: [
       {
         q: 'How do I update my details or photos?',
-        text: 'Sign in, then choose "Edit profile" on My account. Changes are saved straight away.',
+        text: 'Sign in and choose "Edit profile" on My account. Your changes show as soon as you save.',
         body: (
           <p>
-            <Link href="/account/login">Sign in</Link>, then choose &ldquo;Edit profile&rdquo; on My account. Changes are
-            saved straight away.
+            <Link href="/account/login">Sign in</Link> and choose &ldquo;Edit profile&rdquo; on My account. Your changes
+            show as soon as you save.
           </p>
         ),
       },
@@ -162,7 +162,7 @@ const groups: Group[] = [
       },
       {
         q: 'Will I definitely be contacted?',
-        text: 'Not always. We contact actors when a role fits their profile, usually on WhatsApp or by email. Registering does not guarantee an audition or a role.',
+        text: 'Not necessarily. We get in touch when a role fits your profile, usually on WhatsApp or by email. Registering doesn\'t guarantee an audition or a role.',
       },
     ],
   },
@@ -176,12 +176,13 @@ const groups: Group[] = [
       },
       {
         q: 'Who can see my photos and details?',
-        text: `Only ${LEGAL.companyName}'s casting team, to consider you for roles. Your profile is never public. See our Privacy Policy and Photo & Consent Policy for details.`,
+        text: `${LEGAL.companyName}'s casting team. When you're being considered for a particular role, we may also share your profile with that project's director, client or production partners, for that decision only. Your profile is never public. Our Privacy Policy and Photo & Consent Policy have the details.`,
         body: (
           <p>
-            Only {LEGAL.companyName}&apos;s casting team, to consider you for roles. Your profile is never public. See our{' '}
-            <Link href="/privacy">Privacy Policy</Link> and <Link href="/photo-consent">Photo &amp; Consent Policy</Link>{' '}
-            for details.
+            {LEGAL.companyName}&apos;s casting team. When you&apos;re being considered for a particular role, we may also
+            share your profile with that project&apos;s director, client or production partners, for that decision only.
+            Your profile is never public. Our <Link href="/privacy">Privacy Policy</Link> and{' '}
+            <Link href="/photo-consent">Photo &amp; Consent Policy</Link> have the details.
           </p>
         ),
       },
@@ -213,7 +214,7 @@ export default function FaqPage() {
       title="Frequently asked questions"
       eyebrow="Help"
       sections={[...groups.map(({id, title}) => ({id, title})), {id: 'help', title: 'Still need help?'}]}
-      intro={<p>Answers for actors, and parents registering a child, about submitting a profile with {LEGAL.companyName}.</p>}
+      intro={<p>Questions we often get from actors, and from parents registering a child.</p>}
     >
       <script
         type="application/ld+json"
