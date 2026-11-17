@@ -37,8 +37,9 @@ export default function PrivacyPage() {
     >
       <Section id="who-we-are" title="Who we are">
         <p>
-          {LEGAL.companyName} (&quot;we&quot;, &quot;us&quot;) is the data fiduciary responsible for your personal data under
-          India&apos;s Digital Personal Data Protection Act, 2023. Our registered address is {LEGAL.address}.
+          {LEGAL.companyName} is a brand of {LEGAL.legalEntity} (&quot;we&quot;, &quot;us&quot;), the data fiduciary
+          responsible for your personal data under India&apos;s Digital Personal Data Protection Act, 2023. Our
+          registered address is {LEGAL.address}.
         </p>
       </Section>
 
@@ -156,7 +157,7 @@ export default function PrivacyPage() {
           not satisfied with our response, you may complain to the Data Protection Board of India.
         </p>
         <p>
-          {LEGAL.companyName}, {LEGAL.address}
+          {LEGAL.legalEntity} ({LEGAL.companyName}), {LEGAL.address}
         </p>
       </Section>
 

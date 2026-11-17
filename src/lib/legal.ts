@@ -1,10 +1,12 @@
 /**
  * Facts used across the policy pages. Change them here, not in the pages.
- * Fill in `address` before going live.
  */
 export const LEGAL = {
+  /** Brand name used in running text. */
   companyName: 'Madarth',
-  address: '[REGISTERED ADDRESS]',
+  /** Registered company that owns the Madarth brand (the data fiduciary). */
+  legalEntity: 'PIXEL BOY MEDIA PUBLICITIES PRIVATE LIMITED',
+  address: 'Madarth 4, Alamelu Manga Puram Rd, Saradapuram, Mylapore, Chennai, Tamil Nadu 600004',
   privacyEmail: 'productions@madarth.com',
   retention: '2 years',
   withdrawalDays: 30,

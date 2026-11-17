@@ -29,7 +29,8 @@ export default function TermsPage() {
       sections={sections}
       intro={
         <p>
-          By submitting a profile on this site you agree to these terms, our{' '}
+          This site is run by {LEGAL.legalEntity}, which owns the {LEGAL.companyName} brand. By submitting a profile on
+          this site you agree to these terms, our{' '}
           <Link href="/privacy">Privacy Policy</Link> and our <Link href="/photo-consent">Photo &amp; Consent Policy</Link>.
         </p>
       }
@@ -95,7 +96,8 @@ export default function TermsPage() {
 
       <Section id="liability" title="Limitation of liability">
         <p>
-          The site is provided &quot;as is&quot;. To the extent the law allows, {LEGAL.companyName} is not liable for
+          The site is provided &quot;as is&quot;. To the extent the law allows, {LEGAL.legalEntity} ({LEGAL.companyName})
+          is not liable for
           any indirect loss arising from using the site or from not being selected for a role. Nothing in these terms
           limits your rights under Indian consumer or data protection law.
         </p>
@@ -110,7 +112,7 @@ export default function TermsPage() {
 
       <Section id="contact" title="Contact">
         <p>
-          Questions about these terms: <Email />. {LEGAL.companyName}, {LEGAL.address}.
+          Questions about these terms: <Email />. {LEGAL.legalEntity} ({LEGAL.companyName}), {LEGAL.address}.
         </p>
       </Section>
     </LegalPage>
