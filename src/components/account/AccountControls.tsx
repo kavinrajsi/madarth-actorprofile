@@ -18,20 +18,31 @@ export function ChangeEmailForm({current}: {current: string}) {
   const [message, setMessage] = useState<{ok: boolean; text: string} | null>(null);
   const [isPending, start] = useTransition();
 
+  const summary = (
+    <div className={styles.settingBody}>
+      <span className={styles.settingLabel}>Login email</span>
+      <span className={styles.meta}>{current}</span>
+    </div>
+  );
   if (!open) {
     return (
-      <div className={styles.actions}>
-        <p className={styles.meta}>
-          Login email: <strong style={{color: 'var(--mad-paper)'}}>{current}</strong>
-        </p>
+      <>
+        {summary}
         <Button variant="secondary" size="sm" label="Change email" onClick={() => setOpen(true)} />
+      </>
+    );
+  }
+  if (message?.ok) {
+    return (
+      <div className={styles.settingWide}>
+        {summary}
+        <Banner status="success" title={message.text} />
       </div>
     );
   }
-  if (message?.ok) return <Banner status="success" title={message.text} />;
   return (
     <form
-      className={styles.form}
+      className={`${styles.form} ${styles.settingWide}`}
       noValidate
       onSubmit={(e) => {
         e.preventDefault();
@@ -47,6 +58,7 @@ export function ChangeEmailForm({current}: {current: string}) {
         });
       }}
     >
+      {summary}
       <TextInput label="New email" type="email" value={email} onChange={setEmail} autoComplete="email" status={err(errors.newEmail)} width="100%" />
       <TextInput
         label="Current password"

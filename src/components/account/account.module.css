@@ -169,3 +169,261 @@
   font-size: 13px;
   color: var(--mad-muted);
 }
+
+/* ── Account dashboard ───────────────────────────────────── */
+.dashboard {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-block: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .dashboard {
+    padding-top: 64px;
+  }
+}
+
+.dashHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.switcher {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.switch {
+  border: 1px solid var(--mad-line);
+  padding: 6px 12px;
+  color: var(--mad-paper);
+  text-decoration: none;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.switch[aria-current='page'] {
+  border-color: var(--mad-yellow);
+  color: var(--mad-yellow);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+  .profileCard {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+.profileCard {
+  border: 1px solid var(--mad-line);
+  background: #151515;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 560px) and (max-width: 899px) {
+  .profileCard {
+    flex-direction: row;
+  }
+  .profileCard .headshot {
+    width: 200px;
+    flex-shrink: 0;
+  }
+}
+
+.headshot {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  background: #1c1c1c;
+}
+
+.profileBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.idList {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.idList dt {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--mad-muted);
+}
+
+.idList dd {
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+
+.code {
+  font-variant-numeric: tabular-nums;
+  color: var(--mad-yellow);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.card {
+  border: 1px solid var(--mad-line);
+  background: #151515;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .card {
+    padding: 24px 28px;
+  }
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.textLink {
+  color: var(--mad-yellow);
+  font-size: 14px;
+  text-underline-offset: 3px;
+}
+
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px 24px;
+}
+
+@media (min-width: 640px) {
+  .checklist {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.checklist li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--mad-muted);
+}
+
+.checklist li > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.checklist li[data-done='true'] {
+  color: var(--mad-paper);
+}
+
+.checklist li[data-done='true'] > svg {
+  color: var(--mad-yellow);
+}
+
+.checkLabel {
+  display: block;
+  font-size: 15px;
+  line-height: 22px;
+}
+
+.checkHint {
+  display: block;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--mad-muted);
+}
+
+.settings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings > li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  padding-block: 14px;
+  border-top: 1px solid var(--mad-line);
+}
+
+.settings > li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.settings > li > svg {
+  color: var(--mad-muted);
+  flex-shrink: 0;
+}
+
+.settingBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+
+.settingLabel {
+  font-weight: 500;
+}
+
+.settingWide {
+  flex: 1;
+  min-width: 0;
+}
+
+.dangerCard {
+  border-color: #4a2a2a;
+}

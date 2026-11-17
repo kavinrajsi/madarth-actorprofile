@@ -1,4 +1,5 @@
 import 'server-only';
+import {connection} from 'next/server';
 import {and, desc, eq, gt, isNull, sql} from 'drizzle-orm';
 import {getDb, schema} from '@/db';
 import type {ActorAccount} from '@/db/schema';
@@ -50,6 +51,8 @@ export async function issueToken(accountId: string, purpose: Purpose, newEmail?:
 
 /** Looks a token up without using it (to decide whether to show a form). */
 export async function peekToken(token: string, purpose: Purpose) {
+  // Compares against the current time, so this must run per request (not during prerender).
+  await connection();
   if (!token || token.length > 100) return null;
   const [row] = await getDb()
     .select({accountId: accountTokens.accountId, email: actorAccounts.email, newEmail: accountTokens.newEmail})

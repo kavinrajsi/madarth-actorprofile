@@ -99,3 +99,32 @@ img {
 textarea {
   resize: none;
 }
+
+/* Simple 404 page */
+.mad-404 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding-block: 96px;
+}
+
+.mad-404 h1 {
+  margin: 0;
+  font-size: 96px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.mad-404 p {
+  margin: 0;
+  color: var(--mad-muted);
+}
+
+.mad-404 a {
+  margin-top: 16px;
+  color: var(--mad-yellow);
+  text-underline-offset: 3px;
+}
