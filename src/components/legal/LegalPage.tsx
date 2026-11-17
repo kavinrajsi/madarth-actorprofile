@@ -1,6 +1,5 @@
-import Link from 'next/link';
 import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
-import {LEGAL, POLICY_LINKS} from '@/lib/legal';
+import {LEGAL} from '@/lib/legal';
 import styles from './legal.module.css';
 
 type Props = {
@@ -38,15 +37,6 @@ export function LegalPage({title, intro, sections, children}: Props) {
           )}
 
           <div className={styles.prose}>{children}</div>
-
-          <nav className={styles.related} aria-label="Other policies">
-            {POLICY_LINKS.filter((l) => l.label !== title).map((l) => (
-              <Link key={l.href} href={l.href}>
-                {l.label}
-              </Link>
-            ))}
-            <Link href="/">Back to registration</Link>
-          </nav>
         </article>
       </main>
       <SiteFooter />

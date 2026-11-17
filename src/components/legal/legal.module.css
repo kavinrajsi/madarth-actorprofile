@@ -69,8 +69,7 @@
 }
 
 .toc a,
-.prose a,
-.related a {
+.prose a {
   color: var(--mad-yellow);
   text-underline-offset: 3px;
 }
@@ -125,14 +124,6 @@
   padding: 16px 20px;
 }
 
-.related {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px 24px;
-  border-top: 1px solid var(--mad-line);
-  padding-top: 24px;
-  font-size: 15px;
-}
 
 /* Astryx's reset removes list markers; bring them back for policy text. */
 .section ul {
