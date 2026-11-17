@@ -1,0 +1,1 @@
+ALTER TABLE "actors" DROP COLUMN "showreel_url";

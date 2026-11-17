@@ -8,8 +8,10 @@ import {requireAdmin} from '@/lib/authz';
 import {GENDER_LABEL, STATUS_LABEL} from '@/lib/constants';
 import {getActorByCode} from '@/lib/queries';
 import {whatsappLink} from '@/lib/text';
+import {ageFromDob} from '@/lib/age';
 import styles from '@/components/admin/admin.module.css';
 
+const dob = new Intl.DateTimeFormat('en-IN', {dateStyle: 'long', timeZone: 'UTC'});
 const dt = new Intl.DateTimeFormat('en-IN', {dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Kolkata'});
 
 function Item({label, children}: {label: string; children: React.ReactNode}) {
@@ -66,7 +68,7 @@ export default async function ActorPage({params}: {params: Promise<{code: string
           </section>
 
           <section className={styles.panel}>
-            <h2 className={styles.panelTitle}>Contact</h2>
+            <h2 className={styles.panelTitle}>Contact &amp; social media</h2>
             <dl className={styles.dl}>
               <Item label="Contact number">
                 <a href={`tel:${a.phone}`}>{a.phone}</a>
@@ -86,6 +88,21 @@ export default async function ActorPage({params}: {params: Promise<{code: string
                   </a>
                 ) : null}
               </Item>
+              {a.youtubeUrl && (
+                <Item label="YouTube">
+                  <Ext href={a.youtubeUrl} />
+                </Item>
+              )}
+              {a.facebookUrl && (
+                <Item label="Facebook">
+                  <Ext href={a.facebookUrl} />
+                </Item>
+              )}
+              {a.otherSocialLinks.map((l, i) => (
+                <Item key={l} label={i === 0 ? 'Other social media' : ''}>
+                  <Ext href={l} />
+                </Item>
+              ))}
               {a.guardianName && (
                 <>
                   <Item label="Parent / guardian">{a.guardianName}</Item>
@@ -100,7 +117,8 @@ export default async function ActorPage({params}: {params: Promise<{code: string
           <section className={styles.panel}>
             <h2 className={styles.panelTitle}>Basic details</h2>
             <dl className={styles.dl}>
-              <Item label="Age at submission">{a.age}</Item>
+              <Item label="Date of birth">{dob.format(new Date(`${a.dateOfBirth}T00:00:00Z`))}</Item>
+              <Item label="Age">{ageFromDob(a.dateOfBirth)}</Item>
               <Item label="Gender">{GENDER_LABEL[a.gender]}</Item>
               <Item label="City">{a.city}</Item>
               <Item label="Height">{a.heightCm ? `${a.heightCm} cm` : null}</Item>
@@ -119,24 +137,24 @@ export default async function ActorPage({params}: {params: Promise<{code: string
           <section className={styles.panel}>
             <h2 className={styles.panelTitle}>Acting experience</h2>
             <p className={styles.prose}>{a.experience || '—'}</p>
-            {a.showreelUrl && (
-              <dl className={styles.dl}>
-                <Item label="Showreel / audition video">
-                  <Ext href={a.showreelUrl} />
-                </Item>
-              </dl>
-            )}
-            {a.portfolioLinks.length > 0 && (
-              <>
-                <h3 style={{fontSize: 15, margin: 0, color: 'var(--mad-muted)', fontWeight: 400}}>Portfolio links</h3>
-                <ul className={styles.linkList}>
-                  {a.portfolioLinks.map((l) => (
-                    <li key={l}>
-                      <Ext href={l} />
-                    </li>
-                  ))}
-                </ul>
-              </>
+            {(
+              [
+                ['Showreel / audition videos', a.showreelUrls],
+                ['Portfolio links', a.portfolioLinks],
+              ] as const
+            ).map(([title, links]) =>
+              links.length > 0 ? (
+                <div key={title} style={{display: 'flex', flexDirection: 'column', gap: 8}}>
+                  <h3 style={{fontSize: 15, margin: 0, color: 'var(--mad-muted)', fontWeight: 400}}>{title}</h3>
+                  <ul className={styles.linkList}>
+                    {links.map((l) => (
+                      <li key={l}>
+                        <Ext href={l} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null,
             )}
           </section>
 

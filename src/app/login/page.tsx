@@ -5,7 +5,7 @@ import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
 import {getAdmin} from '@/lib/authz';
 import {signInWithGoogle} from './actions';
-import {SiteHeader} from '@/components/site/SiteHeader';
+import {SiteFooter} from '@/components/site/SiteHeader';
 import styles from '@/components/site/site.module.css';
 
 export const metadata: Metadata = {title: 'Casting team sign in', robots: {index: false}};
@@ -19,12 +19,12 @@ type SP = Promise<{error?: string; callbackUrl?: string}>;
 export default function LoginPage({searchParams}: {searchParams: SP}) {
   return (
     <>
-      <SiteHeader />
       <main className={`mad-container ${styles.center}`}>
         <Suspense fallback={<div className={styles.hero} />}>
           <LoginContent searchParams={searchParams} />
         </Suspense>
       </main>
+      <SiteFooter />
     </>
   );
 }

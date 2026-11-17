@@ -1,6 +1,7 @@
 import {sql} from 'drizzle-orm';
 import {
   boolean,
+  date,
   index,
   integer,
   pgEnum,
@@ -34,7 +35,8 @@ export const actors = pgTable(
 
     // Basic details
     fullName: text('full_name').notNull(),
-    age: integer('age').notNull(),
+    /** Stored as YYYY-MM-DD; age is always calculated from it. */
+    dateOfBirth: date('date_of_birth', {mode: 'string'}).notNull(),
     gender: genderEnum('gender').notNull(),
     city: text('city').notNull(),
     cityNormalized: text('city_normalized').notNull(),
@@ -50,12 +52,15 @@ export const actors = pgTable(
     // Social
     instagramHandle: text('instagram_handle'),
     instagramUrl: text('instagram_url'),
+    youtubeUrl: text('youtube_url'),
+    facebookUrl: text('facebook_url'),
+    otherSocialLinks: text('other_social_links').array().notNull().default(sql`'{}'::text[]`),
 
     // Acting experience
     intro: text('intro').notNull(),
     experience: text('experience'),
     portfolioLinks: text('portfolio_links').array().notNull().default(sql`'{}'::text[]`),
-    showreelUrl: text('showreel_url'),
+    showreelUrls: text('showreel_urls').array().notNull().default(sql`'{}'::text[]`),
 
     // Additional
     languages: text('languages').array().notNull().default(sql`'{}'::text[]`),
@@ -80,7 +85,7 @@ export const actors = pgTable(
   (t) => [
     index('actors_status_idx').on(t.status),
     index('actors_gender_idx').on(t.gender),
-    index('actors_age_idx').on(t.age),
+    index('actors_dob_idx').on(t.dateOfBirth),
     index('actors_city_idx').on(t.cityNormalized),
     index('actors_languages_idx').using('gin', t.languages),
     index('actors_created_idx').on(t.createdAt.desc()),

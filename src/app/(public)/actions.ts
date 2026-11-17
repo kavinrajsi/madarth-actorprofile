@@ -5,6 +5,7 @@ import {head} from '@vercel/blob';
 import {eq, or, sql} from 'drizzle-orm';
 import {getDb, schema} from '@/db';
 import {isPathInDraft} from '@/lib/blob-paths';
+import {ageFromDob} from '@/lib/age';
 import {CONSENT_VERSION} from '@/lib/constants';
 import {rateLimit} from '@/lib/rate-limit';
 import {clean, instagramHandle, normalizeCity, normalizePhone, titleCase} from '@/lib/text';
@@ -51,7 +52,7 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
     .limit(1);
 
   const handle = v.instagramHandle ? instagramHandle(v.instagramHandle) : undefined;
-  const isMinor = v.age < 18;
+  const isMinor = (ageFromDob(v.dateOfBirth) ?? 99) < 18;
   const actorId = randomUUID();
   const languages = [...new Set(v.languages.map(titleCase))];
 
@@ -60,7 +61,7 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
     .values({
       id: actorId,
       fullName: clean(v.fullName),
-      age: v.age,
+      dateOfBirth: v.dateOfBirth,
       gender: v.gender,
       city: titleCase(v.city),
       cityNormalized: normalizeCity(v.city),
@@ -72,10 +73,13 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
       guardianConsent: isMinor ? true : null,
       instagramHandle: handle ?? null,
       instagramUrl: v.instagramUrl ?? (handle ? `https://instagram.com/${handle}` : null),
+      youtubeUrl: v.youtubeUrl ?? null,
+      facebookUrl: v.facebookUrl ?? null,
+      otherSocialLinks: v.otherSocialLinks,
       intro: v.intro,
       experience: v.experience ?? null,
       portfolioLinks: v.portfolioLinks,
-      showreelUrl: v.showreelUrl ?? null,
+      showreelUrls: v.showreelUrls,
       languages,
       heightCm: v.heightCm ?? null,
       profession: v.profession ?? null,

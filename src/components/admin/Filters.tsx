@@ -113,6 +113,8 @@ export function Filters({initial, cityOptions, languageOptions}: Props) {
           value={langs}
           onChange={setLangs}
           hasSearch
+          triggerDisplay="badges"
+          maxBadges={6}
           placeholder="Any language"
           width="100%"
         />

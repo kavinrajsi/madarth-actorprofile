@@ -26,9 +26,41 @@
 .footer {
   background: var(--mad-ink-1000);
   color: var(--mad-muted);
-  font-size: 12px;
-  padding-block: 24px;
+  font-size: 14px;
+  padding-block: 32px;
   margin-top: 64px;
+  border-top: 1px solid var(--mad-line);
+}
+
+.footerInner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+}
+
+.footerNav a {
+  color: var(--mad-paper);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+
+.footerNav a:hover,
+.footerNav a:focus-visible {
+  text-decoration: underline;
+}
+
+.footerLegal {
+  margin: 0;
+}
+
+.footerLegal {
+  font-size: 12px;
 }
 
 .hero {
@@ -78,6 +110,19 @@
 
 .narrow {
   max-width: 860px;
+}
+
+/* Registration form: centred column */
+.formColumn {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-top: 16px;
+}
+
+@media (min-width: 768px) {
+  .formColumn {
+    padding-top: 40px;
+  }
 }
 
 .center {

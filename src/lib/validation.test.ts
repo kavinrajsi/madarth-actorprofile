@@ -3,12 +3,16 @@ import {isPathInDraft} from './blob-paths';
 import {instagramHandle, normalizeCity, titleCase, whatsappLink} from './text';
 import {fieldErrors, submissionSchema, type SubmissionInput} from './validation';
 
+import {ageFromDob, isIsoDate} from './age';
+
+const minorDob = `${new Date().getFullYear() - 16}-01-01`;
+
 const draftId = '3f2b8c1e-4d5a-4b6c-9d7e-8f9a0b1c2d3e';
 
 const valid = (): SubmissionInput => ({
   draftId,
   fullName: 'Priya Raman',
-  age: 24,
+  dateOfBirth: '2000-05-14',
   gender: 'female',
   city: 'Chennai',
   phone: '+91 98765 43210',
@@ -22,7 +26,7 @@ const valid = (): SubmissionInput => ({
   intro: 'Theatre actor.',
   experience: '',
   portfolioLinks: ['https://youtube.com/watch?v=1'],
-  showreelUrl: '',
+  showreelUrls: ['https://youtu.be/reel1', 'https://vimeo.com/2'],
   languages: ['Tamil', 'English'],
   heightCm: 165,
   profession: '',
@@ -69,11 +73,11 @@ describe('submissionSchema', () => {
   });
 
   it('requires guardian details for under-18s', () => {
-    const e = errorsOf({...valid(), age: 16});
+    const e = errorsOf({...valid(), dateOfBirth: minorDob});
     expect(e.guardianName).toBeDefined();
     expect(e.guardianPhone).toBeDefined();
     expect(e.guardianConsent).toBeDefined();
-    const ok = errorsOf({...valid(), age: 16, guardianName: 'Ravi', guardianPhone: '9876500000', guardianConsent: true});
+    const ok = errorsOf({...valid(), dateOfBirth: minorDob, guardianName: 'Ravi', guardianPhone: '9876500000', guardianConsent: true});
     expect(ok).toEqual({});
   });
 
@@ -100,6 +104,50 @@ describe('submissionSchema', () => {
   it('rejects unsupported image types', () => {
     const photos = [{...valid().photos[0], contentType: 'image/gif'}];
     expect(Object.keys(errorsOf({...valid(), photos })).some((k) => k.startsWith('photos'))).toBe(true);
+  });
+});
+
+describe('social links', () => {
+  it('accepts matching YouTube, Facebook and other links', () => {
+    expect(
+      errorsOf({
+        ...valid(),
+        youtubeUrl: 'https://www.youtube.com/@priya',
+        facebookUrl: 'https://m.facebook.com/priya',
+        otherSocialLinks: ['https://x.com/priya', 'https://www.imdb.com/name/nm1'],
+      }),
+    ).toEqual({});
+    expect(errorsOf({...valid(), youtubeUrl: 'https://youtu.be/abc'})).toEqual({});
+  });
+
+  it('rejects links from the wrong site', () => {
+    const e = errorsOf({
+      ...valid(),
+      instagramUrl: 'https://facebook.com/priya',
+      youtubeUrl: 'https://vimeo.com/1',
+      facebookUrl: 'https://notfacebook.com/x',
+      otherSocialLinks: ['not a link'],
+    });
+    expect(e.instagramUrl).toBeDefined();
+    expect(e.youtubeUrl).toBeDefined();
+    expect(e.facebookUrl).toBeDefined();
+    expect(e['otherSocialLinks.0']).toBeDefined();
+  });
+});
+
+describe('date of birth', () => {
+  it('rejects missing, impossible and future dates', () => {
+    expect(errorsOf({...valid(), dateOfBirth: ''}).dateOfBirth).toMatch(/required/i);
+    expect(errorsOf({...valid(), dateOfBirth: '2001-02-30'}).dateOfBirth).toBeDefined();
+    expect(errorsOf({...valid(), dateOfBirth: '2999-01-01'}).dateOfBirth).toMatch(/future/i);
+  });
+
+  it('calculates age with birthdays', () => {
+    expect(ageFromDob('2000-05-14', '2026-05-13')).toBe(25);
+    expect(ageFromDob('2000-05-14', '2026-05-14')).toBe(26);
+    expect(ageFromDob('2004-02-29', '2026-02-28')).toBe(21);
+    expect(ageFromDob('', '2026-01-01')).toBeNull();
+    expect(isIsoDate('2026-13-01')).toBe(false);
   });
 });
 

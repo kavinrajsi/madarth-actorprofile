@@ -1,9 +1,9 @@
 import type {ActorStatus, Gender, PhotoKind} from '@/db/schema';
 
-export const CONSENT_VERSION = '2026-11-v1';
+export const CONSENT_VERSION = '2026-11-v2';
 
 export const CONSENT_TEXT =
-  'I give Madarth permission to store and use the photographs and details I have submitted for casting purposes, and to contact me about casting opportunities.';
+  'I give Madarth permission to store and use the photographs and details I have submitted for casting purposes, as described in the Privacy Policy and Photo & Consent Policy, and to contact me about casting opportunities.';
 
 export const GUARDIAN_CONSENT_TEXT =
   'I am the parent or legal guardian of this actor and I give the same permission on their behalf.';
@@ -48,25 +48,6 @@ export const LANGUAGES = [
   'Sourashtra',
   'French',
   'Arabic',
-];
-
-export const COMMON_CITIES = [
-  'Chennai',
-  'Coimbatore',
-  'Madurai',
-  'Tiruchirappalli',
-  'Salem',
-  'Tirunelveli',
-  'Vellore',
-  'Puducherry',
-  'Bengaluru',
-  'Hyderabad',
-  'Kochi',
-  'Thiruvananthapuram',
-  'Mumbai',
-  'Delhi',
-  'Kolkata',
-  'Pune',
 ];
 
 export const PHOTO_RULES: Record<PhotoKind, {label: string; min: number; max: number}> = {

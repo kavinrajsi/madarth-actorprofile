@@ -4,7 +4,7 @@ import {neutralTheme} from '@astryxdesign/theme-neutral';
 /**
  * Madarth brand theme (dark only).
  * Source: Madarth design system tokens (ink-900 ground, paper text,
- * brand-yellow accent with black text, brand-orange for labels, square corners).
+ * brand-yellow accent with black text and for labels, square corners; no orange).
  * Every value is a [light, dark] tuple with the same value: the app always runs in dark mode.
  */
 const c = (v: string): [string, string] => [v, v];
@@ -17,8 +17,7 @@ const TEXT_SECONDARY = '#b8b8b8'; // 9.6:1 on ink-900
 const LINE = '#3d3d3d'; // decorative hairline (1.7:1), never for controls
 const CONTROL_BORDER = '#707070'; // 3.7:1 on ink-900, meets 3:1 for control borders
 const YELLOW = '#fddb45';
-const ORANGE = '#da5326';
-const DANGER = '#ff7a7a'; // 7.1:1 on ink-900; redder and lighter than brand-orange
+const DANGER = '#ff7a7a'; // 7.1:1 on ink-900
 
 export const madarthTheme = defineTheme({
   name: 'madarth',
@@ -58,7 +57,11 @@ export const madarthTheme = defineTheme({
     '--color-error-muted': c('#ff7a7a26'),
     '--color-on-error-muted': c('#ffb3b3'),
 
-    '--color-text-orange': c(ORANGE),
+    // No orange in the UI: Astryx's orange text role uses Madarth yellow.
+    '--color-text-orange': c(YELLOW),
+    '--color-icon-orange': c(YELLOW),
+    '--color-border-orange': c(YELLOW),
+    '--color-background-orange': c('#fddb4533'),
     '--color-text-gray': c(PAPER_SOFT),
   },
 });

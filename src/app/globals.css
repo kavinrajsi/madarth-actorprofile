@@ -12,7 +12,6 @@
   --mad-paper-soft: #f8f8f8;
   --mad-line: #3d3d3d;
   --mad-yellow: #fddb45;
-  --mad-orange: #da5326;
   --mad-danger: #ff7a7a;
   --mad-muted: #b8b8b8;
   --mad-gutter: 16px;
@@ -48,14 +47,14 @@ img {
   display: block;
 }
 
-/* Uppercase orange label above a headline (Madarth "eyebrow"). */
+/* Uppercase yellow label above a headline (Madarth "eyebrow"). */
 .mad-eyebrow {
   font-size: 13px;
   line-height: 16px;
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--mad-orange);
+  color: var(--mad-yellow);
 }
 
 .mad-container {
@@ -72,4 +71,19 @@ img {
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+/* Label markers: Astryx renders "Label ∙ Required"; we show "Label *" / "Label (optional)".
+   Hide the hard-coded " ∙ " separator (an aria-hidden span) inside field labels. */
+.astryx-field-label > span > span[aria-hidden='true']:only-child {
+  display: none;
+}
+
+.astryx-field-label > span:has(> span[aria-hidden='true']:only-child) {
+  margin-left: 0.25em;
+}
+
+/* No manual resizing of text areas (form + admin notes). */
+textarea {
+  resize: none;
 }

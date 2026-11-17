@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import {Suspense} from 'react';
 import {Button} from '@astryxdesign/core/Button';
 import {AdminNav} from '@/components/admin/AdminNav';
-import {SiteHeader} from '@/components/site/SiteHeader';
+import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
 import {requireAdmin} from '@/lib/authz';
 import {signOutAction} from './actions';
 import styles from '@/components/admin/admin.module.css';
@@ -44,6 +44,7 @@ async function AdminShell({children}: {children: React.ReactNode}) {
         }
       />
       <main className={`mad-container ${styles.main}`}>{children}</main>
+      <SiteFooter />
     </div>
   );
 }

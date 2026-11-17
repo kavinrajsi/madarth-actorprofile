@@ -1,5 +1,5 @@
 import 'server-only';
-import {and, arrayOverlaps, asc, count, desc, eq, gte, ilike, lt, lte, or, sql, type SQL} from 'drizzle-orm';
+import {and, arrayOverlaps, asc, count, desc, eq, gte, ilike, lt, or, sql, type SQL} from 'drizzle-orm';
 import {getDb, schema} from '@/db';
 import {genderEnum, statusEnum} from '@/db/schema-enums';
 import type {ActorStatus, Gender} from '@/db/schema';
@@ -65,8 +65,13 @@ function whereFor(f: Filters): SQL | undefined {
       ),
     );
   }
-  if (f.ageMin !== undefined) c.push(gte(actors.age, f.ageMin));
-  if (f.ageMax !== undefined) c.push(lte(actors.age, f.ageMax));
+  // Age is derived from date of birth, so filters stay correct as time passes.
+  if (f.ageMin !== undefined) {
+    c.push(sql`${actors.dateOfBirth} <= (current_date - make_interval(years => ${f.ageMin}))`);
+  }
+  if (f.ageMax !== undefined) {
+    c.push(sql`${actors.dateOfBirth} > (current_date - make_interval(years => ${f.ageMax + 1}))`);
+  }
   if (f.gender) c.push(eq(actors.gender, f.gender));
   if (f.city) c.push(eq(actors.cityNormalized, f.city));
   if (f.languages.length) c.push(arrayOverlaps(actors.languages, f.languages));
@@ -96,7 +101,8 @@ export async function listActors(f: Filters) {
         id: actors.id,
         code: actors.actorCode,
         fullName: actors.fullName,
-        age: actors.age,
+        age: sql<number>`extract(year from age(current_date, ${actors.dateOfBirth}))::int`,
+        dateOfBirth: actors.dateOfBirth,
         gender: actors.gender,
         city: actors.city,
         languages: actors.languages,

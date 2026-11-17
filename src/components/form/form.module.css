@@ -11,6 +11,10 @@
   gap: 24px;
 }
 
+.section:first-of-type {
+  border-top: 0;
+}
+
 .sectionHead {
   display: flex;
   flex-direction: column;
@@ -177,4 +181,9 @@
   .submitRow > * {
     width: auto;
   }
+}
+
+.policyLink {
+  color: var(--mad-yellow);
+  text-underline-offset: 3px;
 }

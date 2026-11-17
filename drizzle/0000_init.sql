@@ -17,7 +17,7 @@ CREATE TABLE "actors" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"actor_code" text DEFAULT ('MAD-' || to_char(now(), 'YY') || '-' || lpad(nextval('actor_code_seq')::text, 5, '0')) NOT NULL,
 	"full_name" text NOT NULL,
-	"age" integer NOT NULL,
+	"date_of_birth" date NOT NULL,
 	"gender" "gender" NOT NULL,
 	"city" text NOT NULL,
 	"city_normalized" text NOT NULL,
@@ -29,6 +29,9 @@ CREATE TABLE "actors" (
 	"guardian_consent" boolean,
 	"instagram_handle" text,
 	"instagram_url" text,
+	"youtube_url" text,
+	"facebook_url" text,
+	"other_social_links" text[] DEFAULT '{}'::text[] NOT NULL,
 	"intro" text NOT NULL,
 	"experience" text,
 	"portfolio_links" text[] DEFAULT '{}'::text[] NOT NULL,
@@ -75,7 +78,7 @@ ALTER TABLE "status_events" ADD CONSTRAINT "status_events_actor_id_actors_id_fk"
 CREATE INDEX "actor_photos_actor_idx" ON "actor_photos" USING btree ("actor_id");--> statement-breakpoint
 CREATE INDEX "actors_status_idx" ON "actors" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "actors_gender_idx" ON "actors" USING btree ("gender");--> statement-breakpoint
-CREATE INDEX "actors_age_idx" ON "actors" USING btree ("age");--> statement-breakpoint
+CREATE INDEX "actors_dob_idx" ON "actors" USING btree ("date_of_birth");--> statement-breakpoint
 CREATE INDEX "actors_city_idx" ON "actors" USING btree ("city_normalized");--> statement-breakpoint
 CREATE INDEX "actors_languages_idx" ON "actors" USING gin ("languages");--> statement-breakpoint
 CREATE INDEX "actors_created_idx" ON "actors" USING btree ("created_at" DESC NULLS LAST);--> statement-breakpoint

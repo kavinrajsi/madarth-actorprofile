@@ -1,5 +1,5 @@
 {
-  "id": "f52c893b-c65e-4b48-95e5-44f6dcfa778c",
+  "id": "b1b34a4a-43af-4418-bd61-d56dd6290760",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -123,9 +123,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "age": {
-          "name": "age",
-          "type": "integer",
+        "date_of_birth": {
+          "name": "date_of_birth",
+          "type": "date",
           "primaryKey": false,
           "notNull": true
         },
@@ -195,6 +195,25 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "youtube_url": {
+          "name": "youtube_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "facebook_url": {
+          "name": "facebook_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "other_social_links": {
+          "name": "other_social_links",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::text[]"
         },
         "intro": {
           "name": "intro",
@@ -337,11 +356,11 @@
           "method": "btree",
           "with": {}
         },
-        "actors_age_idx": {
-          "name": "actors_age_idx",
+        "actors_dob_idx": {
+          "name": "actors_dob_idx",
           "columns": [
             {
-              "expression": "age",
+              "expression": "date_of_birth",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

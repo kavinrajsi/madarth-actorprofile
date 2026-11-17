@@ -13,6 +13,7 @@ export type ResultRow = {
   code: string;
   fullName: string;
   age: number;
+  dateOfBirth: string;
   gender: Gender;
   city: string;
   languages: string[];

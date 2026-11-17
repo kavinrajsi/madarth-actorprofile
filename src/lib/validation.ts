@@ -1,5 +1,6 @@
 import {z} from 'zod';
 import {genderEnum, photoKindEnum} from '@/db/schema-enums';
+import {ageFromDob, isIsoDate, todayIST} from './age';
 import {PHOTO_ACCEPT, PHOTO_MAX_BYTES, PHOTO_RULES} from './constants';
 
 const requiredText = (label: string, max = 200) =>
@@ -17,16 +18,17 @@ const optionalText = (max = 2000) =>
     .optional()
     .transform((v) => (v ? v : undefined));
 
-const phone = (label: string) =>
+/** `phrase` is how the field reads mid-sentence (keeps brand casing like "WhatsApp"). */
+const phone = (label: string, phrase = label.toLowerCase()) =>
   z
     .string()
     .trim()
     .min(1, `${label} is required`)
-    .refine((v) => /^\+?[\d\s().-]+$/.test(v), `Enter a valid ${label.toLowerCase()}`)
+    .refine((v) => /^\+?[\d\s().-]+$/.test(v), `Enter a valid ${phrase}`)
     .refine((v) => {
       const d = v.replace(/\D/g, '').length;
       return d >= 10 && d <= 15;
-    }, `Enter a valid ${label.toLowerCase()} (10–15 digits)`);
+    }, `Enter a valid ${phrase} (10–15 digits)`);
 
 const url = z
   .string()
@@ -34,10 +36,28 @@ const url = z
   .url('Enter a full link starting with https://')
   .refine((v) => /^https?:\/\//i.test(v), 'Enter a full link starting with https://');
 
-const optionalUrl = z
-  .union([z.literal(''), url])
-  .optional()
-  .transform((v) => (v ? v : undefined));
+/** True when the URL's host is one of `domains` or a subdomain of one. */
+export function hostIs(value: string, domains: string[]): boolean {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    return domains.some((d) => host === d || host.endsWith(`.${d}`));
+  } catch {
+    return false;
+  }
+}
+
+const socialUrl = (label: string, domains: string[]) =>
+  z
+    .union([
+      z.literal(''),
+      url.refine(
+        (v) => hostIs(v, domains),
+        `Enter ${/^[aeiou]/i.test(label) ? 'an' : 'a'} ${label} link (${domains[0]})`,
+      ),
+    ])
+    .optional()
+    .transform((v) => (v ? v : undefined));
+
 
 export const photoSchema = z.object({
   kind: z.enum(photoKindEnum),
@@ -53,22 +73,36 @@ export const submissionSchema = z
     draftId: z.uuid(),
     // 1. Basic
     fullName: requiredText('Full name', 120),
-    age: z.coerce
-      .number({error: 'Age is required'})
-      .int('Age must be a whole number')
-      .min(1, 'Age is required')
-      .max(100, 'Enter a valid age'),
+    dateOfBirth: z
+      .string({error: 'Date of birth is required'})
+      .trim()
+      .min(1, 'Date of birth is required')
+      .refine(isIsoDate, 'Enter a valid date of birth')
+      .refine((v) => v <= todayIST(), 'Date of birth cannot be in the future')
+      .refine((v) => {
+        const a = ageFromDob(v);
+        return a !== null && a >= 1 && a <= 100;
+      }, 'Enter a valid date of birth'),
     gender: z.enum(genderEnum, {error: 'Select a gender'}),
     city: requiredText('City', 80),
     phone: phone('Contact number'),
-    whatsapp: phone('WhatsApp number'),
-    email: z.string().trim().toLowerCase().email('Enter a valid email address').max(200),
+    whatsapp: phone('WhatsApp number', 'WhatsApp number'),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .min(1, 'Email ID is required')
+      .email('Enter a valid email address')
+      .max(200),
     guardianName: optionalText(120),
     guardianPhone: z.string().trim().optional(),
     guardianConsent: z.boolean().optional(),
     // 2. Social
     instagramHandle: optionalText(60),
-    instagramUrl: optionalUrl,
+    instagramUrl: socialUrl('Instagram', ['instagram.com']),
+    youtubeUrl: socialUrl('YouTube', ['youtube.com', 'youtu.be']),
+    facebookUrl: socialUrl('Facebook', ['facebook.com', 'fb.com']),
+    otherSocialLinks: z.array(url).max(5, 'Add up to 5 links').default([]),
     // 3. Photos
     photos: z
       .array(photoSchema)
@@ -91,14 +125,14 @@ export const submissionSchema = z
     intro: requiredText('Introduction', 1500),
     experience: optionalText(4000),
     portfolioLinks: z.array(url).max(10, 'Add up to 10 links'),
-    showreelUrl: optionalUrl,
+    showreelUrls: z.array(url).max(5, 'Add up to 5 links').default([]),
     // 5. Additional
     languages: z
       .array(z.string().trim().min(1).max(40))
       .min(1, 'Select at least one language')
       .max(15),
     heightCm: z
-      .union([z.literal(''), z.coerce.number().int().min(50, 'Enter height in cm').max(250, 'Enter height in cm')])
+      .union([z.literal(''), z.coerce.number().int().min(50, 'Enter height in cm (50–250)').max(250, 'Enter height in cm (50–250)')])
       .optional()
       .transform((v) => (v === '' || v === undefined ? undefined : v)),
     profession: optionalText(120),
@@ -110,7 +144,7 @@ export const submissionSchema = z
     website: z.string().max(0).optional(),
   })
   .superRefine((v, ctx) => {
-    if (v.age < 18) {
+    if ((ageFromDob(v.dateOfBirth) ?? 99) < 18) {
       if (!v.guardianName) {
         ctx.addIssue({code: 'custom', path: ['guardianName'], message: 'Parent/guardian name is required for under-18s'});
       }

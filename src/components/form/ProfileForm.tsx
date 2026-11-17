@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import {Banner} from '@astryxdesign/core/Banner';
 import {Button} from '@astryxdesign/core/Button';
 import {CheckboxInput} from '@astryxdesign/core/CheckboxInput';
+import {DateInput} from '@astryxdesign/core/DateInput';
 import {MultiSelector} from '@astryxdesign/core/MultiSelector';
 import {NumberInput} from '@astryxdesign/core/NumberInput';
 import {RadioList, RadioListItem} from '@astryxdesign/core/RadioList';
@@ -13,26 +14,24 @@ import {TextArea} from '@astryxdesign/core/TextArea';
 import {TextInput} from '@astryxdesign/core/TextInput';
 import {submitProfile} from '@/app/(public)/actions';
 import {
-  COMMON_CITIES,
   CONSENT_TEXT,
   GENDER_OPTIONS,
   GUARDIAN_CONSENT_TEXT,
   LANGUAGES,
   PHOTO_RULES,
 } from '@/lib/constants';
+import {ageFromDob} from '@/lib/age';
 import {instagramHandle} from '@/lib/text';
 import {fieldErrors, submissionSchema, type SubmissionInput} from '@/lib/validation';
+import {LinkList} from './LinkList';
 import {PhotoUploader, type UploadItem, type UploadMode} from './PhotoUploader';
 import styles from './form.module.css';
 
-const OTHER_CITY = '__other__';
-
 type State = {
   fullName: string;
-  age: number | null;
+  dateOfBirth: string;
   gender: string;
-  citySelect: string;
-  cityOther: string;
+  city: string;
   phone: string;
   whatsappSame: boolean;
   whatsapp: string;
@@ -42,10 +41,13 @@ type State = {
   guardianConsent: boolean;
   instagramHandle: string;
   instagramUrl: string;
+  youtubeUrl: string;
+  facebookUrl: string;
+  otherSocialLinks: string[];
   intro: string;
   experience: string;
   portfolioLinks: string[];
-  showreelUrl: string;
+  showreelUrls: string[];
   languages: string[];
   heightCm: number | null;
   profession: string;
@@ -57,10 +59,9 @@ type State = {
 
 const initial: State = {
   fullName: '',
-  age: null,
+  dateOfBirth: '',
   gender: '',
-  citySelect: '',
-  cityOther: '',
+  city: '',
   phone: '',
   whatsappSame: true,
   whatsapp: '',
@@ -70,10 +71,13 @@ const initial: State = {
   guardianConsent: false,
   instagramHandle: '',
   instagramUrl: '',
+  youtubeUrl: '',
+  facebookUrl: '',
+  otherSocialLinks: [],
   intro: '',
   experience: '',
   portfolioLinks: [''],
-  showreelUrl: '',
+  showreelUrls: [''],
   languages: [],
   heightCm: null,
   profession: '',
@@ -117,27 +121,24 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
     if (errors[key as string]) setErrors((prev) => omit(prev, key as string));
   };
 
-  const cityOptions = useMemo(
-    () => [...COMMON_CITIES.map((c) => ({value: c, label: c})), {value: OTHER_CITY, label: 'Other city…'}],
-    [],
-  );
   const languageOptions = useMemo(() => {
     const all = new Set([...LANGUAGES, ...s.languages]);
     return [...all].map((l) => ({value: l, label: l}));
   }, [s.languages]);
 
-  const isMinor = s.age !== null && s.age < 18;
+  // Only computed once a date is entered (keeps `new Date()` out of the prerender).
+  const age = s.dateOfBirth ? ageFromDob(s.dateOfBirth) : null;
+  const isMinor = age !== null && age < 18;
   const uploading = photos.some((p) => p.status === 'uploading');
   const photoError = (kind: string) => errors[`photos.${kind}`];
 
   function buildInput(): SubmissionInput {
-    const city = s.citySelect === OTHER_CITY ? s.cityOther : s.citySelect;
     return {
       draftId: getDraftId(),
       fullName: s.fullName,
-      age: s.age ?? ('' as unknown as number),
+      dateOfBirth: s.dateOfBirth,
       gender: s.gender as SubmissionInput['gender'],
-      city,
+      city: s.city,
       phone: s.phone,
       whatsapp: s.whatsappSame ? s.phone : s.whatsapp,
       email: s.email,
@@ -146,13 +147,16 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       guardianConsent: isMinor ? s.guardianConsent : undefined,
       instagramHandle: s.instagramHandle,
       instagramUrl: s.instagramUrl,
+      youtubeUrl: s.youtubeUrl,
+      facebookUrl: s.facebookUrl,
+      otherSocialLinks: s.otherSocialLinks.map((l) => l.trim()).filter(Boolean),
       photos: photos
         .filter((p) => p.status === 'done' && p.pathname)
         .map((p) => ({kind: p.kind, pathname: p.pathname!, contentType: p.contentType, size: p.size})),
       intro: s.intro,
       experience: s.experience,
       portfolioLinks: s.portfolioLinks.map((l) => l.trim()).filter(Boolean),
-      showreelUrl: s.showreelUrl,
+      showreelUrls: s.showreelUrls.map((l) => l.trim()).filter(Boolean),
       languages: s.languages,
       heightCm: s.heightCm ?? '',
       profession: s.profession,
@@ -182,7 +186,6 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
     const parsed = submissionSchema.safeParse(input);
     if (!parsed.success) {
       const fe = fieldErrors(parsed.error);
-      if (fe.city && s.citySelect === OTHER_CITY) fe.cityOther = fe.city;
       setErrors(fe);
       setFormError('Please fix the highlighted fields.');
       focusFirstError();
@@ -230,15 +233,14 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
               width="100%"
             />
           </div>
-          <NumberInput
-            label="Age"
-            value={s.age ?? undefined}
-            onChange={(v) => set('age', Number.isFinite(v) ? v : null)}
+          <DateInput
+            label="Date of birth"
+            value={(s.dateOfBirth || undefined) as React.ComponentProps<typeof DateInput>['value']}
+            onChange={(v) => set('dateOfBirth', v ?? '')}
+            min="1925-01-01"
+            format="date"
             isRequired
-            isIntegerOnly
-            min={1}
-            max={100}
-            status={err(errors.age)}
+            status={err(errors.dateOfBirth)}
             width="100%"
           />
           <Selector
@@ -251,32 +253,17 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             status={err(errors.gender)}
             width="100%"
           />
-          <Selector
+          <TextInput
             label="City / current location"
-            options={cityOptions}
-            value={s.citySelect}
-            onChange={(v) => {
-              set('citySelect', v);
-              setErrors((prev) => omit(prev, 'city', 'cityOther'));
-            }}
-            hasSearch
-            searchPlaceholder="Search cities"
-            placeholder="Select your city"
+            value={s.city}
+            onChange={(v) => set('city', v)}
+            placeholder="e.g. Chennai"
+            autoComplete="address-level2"
+            autoCapitalize="words"
             isRequired
-            status={err(s.citySelect === OTHER_CITY ? undefined : errors.city)}
+            status={err(errors.city)}
             width="100%"
           />
-          {s.citySelect === OTHER_CITY && (
-            <TextInput
-              label="Your city"
-              value={s.cityOther}
-              onChange={(v) => set('cityOther', v)}
-              isRequired
-              autoComplete="address-level2"
-              status={err(errors.cityOther ?? errors.city)}
-              width="100%"
-            />
-          )}
           <TextInput
             label="Contact number"
             type="tel"
@@ -384,7 +371,37 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             status={err(errors.instagramUrl)}
             width="100%"
           />
+          <TextInput
+            label="YouTube channel link"
+            type="url"
+            value={s.youtubeUrl}
+            onChange={(v) => set('youtubeUrl', v)}
+            placeholder="https://youtube.com/@yourchannel"
+            status={err(errors.youtubeUrl)}
+            width="100%"
+          />
+          <TextInput
+            label="Facebook profile link"
+            type="url"
+            value={s.facebookUrl}
+            onChange={(v) => set('facebookUrl', v)}
+            placeholder="https://facebook.com/yourname"
+            status={err(errors.facebookUrl)}
+            width="100%"
+          />
         </div>
+        <LinkList
+          legend="Other social media"
+          description="X (Twitter), LinkedIn, IMDb, Moj, Josh or any other profile."
+          itemLabel="Social link"
+          addLabel="Add a social link"
+          addMoreLabel="Add another social link"
+          values={s.otherSocialLinks}
+          onChange={(v) => set('otherSocialLinks', v)}
+          errors={errors}
+          errorKey="otherSocialLinks"
+          max={5}
+        />
       </section>
 
       {/* 3. Photos */}
@@ -463,61 +480,31 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             status={err(errors.experience)}
             width="100%"
           />
-          <fieldset className={styles.links}>
-            <legend className={styles.legend}>
-              Acting portfolio links <span className={styles.optional}>Optional</span>
-            </legend>
-            <p className={styles.sectionText}>Films, ads, reels, YouTube and so on.</p>
-            {s.portfolioLinks.map((link, i) => (
-              <div className={styles.linkRow} key={i}>
-                <TextInput
-                  label={`Portfolio link ${i + 1}`}
-                  isLabelHidden
-                  type="url"
-                  value={link}
-                  placeholder="https://"
-                  onChange={(v) =>
-                    set(
-                      'portfolioLinks',
-                      s.portfolioLinks.map((l, j) => (j === i ? v : l)),
-                    )
-                  }
-                  status={err(errors[`portfolioLinks.${i}`])}
-                  width="100%"
-                />
-                {s.portfolioLinks.length > 1 && (
-                  <Button
-                    label="Remove"
-                    variant="ghost"
-                    onClick={() =>
-                      set(
-                        'portfolioLinks',
-                        s.portfolioLinks.filter((_, j) => j !== i),
-                      )
-                    }
-                  />
-                )}
-              </div>
-            ))}
-            {s.portfolioLinks.length < 10 && (
-              <div>
-                <Button
-                  label="Add another link"
-                  variant="secondary"
-                  onClick={() => set('portfolioLinks', [...s.portfolioLinks, ''])}
-                />
-              </div>
-            )}
-          </fieldset>
-          <TextInput
-            label="Showreel / audition video link"
-            description="If you have one."
-            type="url"
-            value={s.showreelUrl}
-            onChange={(v) => set('showreelUrl', v)}
-            placeholder="https://"
-            status={err(errors.showreelUrl)}
-            width="100%"
+          <LinkList
+            legend="Acting portfolio links"
+            description="Films, ads, reels, YouTube and so on."
+            itemLabel="Portfolio link"
+            addLabel="Add a link"
+            addMoreLabel="Add another link"
+            values={s.portfolioLinks}
+            onChange={(v) => set('portfolioLinks', v)}
+            errors={errors}
+            errorKey="portfolioLinks"
+            max={10}
+            minRows={1}
+          />
+          <LinkList
+            legend="Showreel / audition video links"
+            description="YouTube, Vimeo, Google Drive or any other video link."
+            itemLabel="Showreel link"
+            addLabel="Add a video link"
+            addMoreLabel="Add another video link"
+            values={s.showreelUrls}
+            onChange={(v) => set('showreelUrls', v)}
+            errors={errors}
+            errorKey="showreelUrls"
+            max={5}
+            minRows={1}
           />
         </div>
       </section>
@@ -535,6 +522,8 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
               onChange={(v) => set('languages', v)}
               hasSearch
               hasCreate
+              triggerDisplay="badges"
+              maxBadges={8}
               placeholder="Select languages"
               isRequired
               status={err(errors.languages)}
@@ -547,8 +536,6 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             value={s.heightCm ?? undefined}
             onChange={(v) => set('heightCm', Number.isFinite(v) ? v : null)}
             isIntegerOnly
-            min={50}
-            max={250}
             status={err(errors.heightCm)}
             width="100%"
           />
@@ -597,6 +584,21 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
             status={err(errors.consent)}
           />
         </div>
+        <p className={styles.sectionText}>
+          Read our{' '}
+          <a href="/privacy" target="_blank" rel="noopener" className={styles.policyLink}>
+            Privacy Policy
+          </a>
+          ,{' '}
+          <a href="/photo-consent" target="_blank" rel="noopener" className={styles.policyLink}>
+            Photo &amp; Consent Policy
+          </a>{' '}
+          and{' '}
+          <a href="/terms" target="_blank" rel="noopener" className={styles.policyLink}>
+            Terms of Use
+          </a>
+          . Links open in a new tab, so your form stays filled in.
+        </p>
         {formError && (
           <div className={styles.formError}>
             <Banner status="error" title={formError} />
