@@ -148,3 +148,10 @@
 .toc li::marker {
   color: var(--mad-yellow);
 }
+
+.section code {
+  font-family: var(--font-family-code, 'SF Mono', Menlo, monospace);
+  font-size: 0.9em;
+  background: #1c1c1c;
+  padding: 1px 5px;
+}

@@ -4,12 +4,13 @@ import {Email, LegalPage, Section} from '@/components/legal/LegalPage';
 
 export const metadata: Metadata = {
   title: 'Cookie Policy',
-  description: 'The cookies used on the Madarth actor registration site.',
+  description: 'The sign-in and analytics cookies used on the Madarth actor registration site.',
 };
 
 const sections = [
   {id: 'summary', title: 'In short'},
   {id: 'public', title: 'Registration form'},
+  {id: 'analytics', title: 'Analytics cookies'},
   {id: 'actor', title: 'Actor account'},
   {id: 'admin', title: 'Casting team dashboard'},
   {id: 'manage', title: 'Managing cookies'},
@@ -21,15 +22,35 @@ export default function CookiesPage() {
     <LegalPage title="Cookie Policy" sections={sections}>
       <Section id="summary" title="In short">
         <p>
-          This site uses no advertising or analytics cookies. The only cookies are the ones needed to sign in: to your
-          actor account, or for our casting team to the dashboard.
+          On casting.madarth.com we use analytics cookies from Google Analytics and Microsoft Clarity to understand how
+          the site is used. We use no advertising cookies. Sign-in cookies keep you signed in to your actor account or
+          the casting team dashboard.
         </p>
       </Section>
 
       <Section id="public" title="Registration form">
         <p>
-          The registration form and policy pages do not set cookies. Your form entries stay in your browser until you
-          submit them. Photos you add are uploaded directly to our private storage.
+          The registration form itself does not need cookies. Photos you add are uploaded directly to our private
+          storage. On casting.madarth.com, the analytics cookies below are set when the page loads.
+        </p>
+      </Section>
+
+      <Section id="analytics" title="Analytics cookies">
+        <p>Loaded through Google Tag Manager, only on casting.madarth.com:</p>
+        <ul>
+          <li>
+            <strong>Google Analytics</strong> (<code>_ga</code>, <code>_ga_*</code>): count visits and pages viewed;
+            kept for up to 2 years.
+          </li>
+          <li>
+            <strong>Microsoft Clarity</strong> (<code>_clck</code>, <code>_clsk</code>, and Microsoft&apos;s{' '}
+            <code>MUID</code>, <code>CLID</code>): link page views into a session for heatmaps and session recordings;
+            kept from 1 day up to 1 year.
+          </li>
+        </ul>
+        <p>
+          Session recordings can include text you type into forms (not passwords). See our{' '}
+          <Link href="/privacy">Privacy Policy</Link> for details.
         </p>
       </Section>
 
@@ -58,8 +79,9 @@ export default function CookiesPage() {
 
       <Section id="manage" title="Managing cookies">
         <p>
-          You can clear or block cookies in your browser settings. Blocking them does not affect the registration form,
-          but you will not be able to sign in to your actor account (and staff cannot sign in to the dashboard).
+          You can clear or block cookies in your browser settings. Blocking analytics cookies does not affect the
+          registration form. Blocking all cookies means you will not be able to sign in to your actor account (and staff
+          cannot sign in to the dashboard). You can also install Google&apos;s Analytics opt-out browser add-on.
         </p>
       </Section>
 

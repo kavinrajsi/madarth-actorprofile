@@ -1,5 +1,6 @@
 import type {Metadata, Viewport} from 'next';
 import {Anek_Tamil} from 'next/font/google';
+import {Analytics} from '@/components/site/Analytics';
 import {Providers} from './providers';
 import './globals.css';
 
@@ -27,6 +28,7 @@ export default function RootLayout({children}: Readonly<{children: React.ReactNo
         <Providers>
           <div className="mad-shell">{children}</div>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );

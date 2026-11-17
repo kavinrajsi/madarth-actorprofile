@@ -13,6 +13,7 @@ const sections = [
   {id: 'what-we-collect', title: 'What we collect'},
   {id: 'why', title: 'Why we use it'},
   {id: 'legal-basis', title: 'Your consent'},
+  {id: 'analytics', title: 'Website analytics and session recordings'},
   {id: 'sharing', title: 'Who can see your profile'},
   {id: 'storage', title: 'Where your data is stored'},
   {id: 'retention', title: 'How long we keep it'},
@@ -66,7 +67,10 @@ export default function PrivacyPage() {
           <li>The date and time of your submission and the version of the consent you agreed to.</li>
           <li>A record of which emails we sent you (type, date and delivery status, not the content).</li>
         </ul>
-        <p>We do not use analytics or advertising trackers on the registration form.</p>
+        <p>
+          On casting.madarth.com we also use analytics and session-recording tools; see{' '}
+          <a href="#analytics">Website analytics and session recordings</a>.
+        </p>
       </Section>
 
       <Section id="why" title="Why we use it">
@@ -88,6 +92,26 @@ export default function PrivacyPage() {
         </p>
       </Section>
 
+      <Section id="analytics" title="Website analytics and session recordings">
+        <p>
+          To understand how the site is used and to fix problems, casting.madarth.com uses Google Tag Manager, Google
+          Analytics and Microsoft Clarity. They collect:
+        </p>
+        <ul>
+          <li>pages visited, clicks, scrolling, time on page, device and browser type, and approximate location;</li>
+          <li>
+            <strong>session recordings</strong> (Microsoft Clarity): a replay of how the page was used, which can include
+            text shown on the page and what is typed into form fields, such as your name, contact details and date of
+            birth. Passwords are never recorded, and sign-in links are hidden from both tools.
+          </li>
+        </ul>
+        <p>
+          Google and Microsoft process this data for us and may store it outside India. We use it only to improve the
+          site, never for advertising. Analytics cookies are listed in our <Link href="/cookies">Cookie Policy</Link>; you
+          can block them in your browser.
+        </p>
+      </Section>
+
       <Section id="sharing" title="Who can see your profile">
         <ul>
           <li>
@@ -100,7 +124,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Service providers who store and process data for us</strong>: Vercel (website hosting and photo
-            storage), Neon (database), Zoho ZeptoMail (sending account emails) and Google (sign-in for our staff). They act on our instructions and may not use
+            storage), Neon (database), Zoho ZeptoMail (sending account emails), Google (sign-in for our staff, Google Analytics
+            and Tag Manager) and Microsoft (Clarity session recordings). They act on our instructions and may not use
             your data for their own purposes.
           </li>
           <li>
