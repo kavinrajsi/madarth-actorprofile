@@ -19,7 +19,7 @@ type SP = Promise<{error?: string; callbackUrl?: string}>;
 export default function LoginPage({searchParams}: {searchParams: SP}) {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader end={null} />
       <main className={`mad-container ${styles.center}`}>
         <Suspense fallback={<div className={styles.hero} />}>
           <LoginContent searchParams={searchParams} />

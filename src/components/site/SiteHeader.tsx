@@ -1,9 +1,16 @@
 import Link from 'next/link';
+import {Button} from '@astryxdesign/core/Button';
 import {POLICY_LINKS} from '@/lib/legal';
 import {Logo} from './Logo';
 import {Year} from './Year';
 import styles from './site.module.css';
 
+/** Actor sign-in button shown at the top right of public pages. */
+export function SignInButton() {
+  return <Button href="/account/login" variant="secondary" size="sm" label="Sign in" />;
+}
+
+/** `end` overrides the right-hand side; omit it for the default Sign in button, pass null for nothing. */
 export function SiteHeader({end}: {end?: React.ReactNode}) {
   return (
     <header className={styles.header}>
@@ -11,7 +18,7 @@ export function SiteHeader({end}: {end?: React.ReactNode}) {
         <Link href="/" className={styles.wordmark} aria-label="Madarth casting home">
           <Logo className={styles.logo} />
         </Link>
-        {end}
+        {end === undefined ? <SignInButton /> : end}
       </div>
     </header>
   );

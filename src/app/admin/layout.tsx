@@ -20,7 +20,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 function AdminLoading() {
   return (
     <div className={styles.shell}>
-      <SiteHeader />
+      <SiteHeader end={null} />
       <main className={`mad-container ${styles.main}`}>
         <p className={styles.meta}>Loading…</p>
       </main>
