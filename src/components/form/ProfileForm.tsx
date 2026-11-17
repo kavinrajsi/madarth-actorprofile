@@ -330,10 +330,9 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
               />
               <div className={styles.full}>
                 <CheckboxInput
-                  label={GUARDIAN_CONSENT_TEXT}
+                  label={`${GUARDIAN_CONSENT_TEXT} *`}
                   value={s.guardianConsent}
                   onChange={(v) => set('guardianConsent', v)}
-                  isRequired
                   status={err(errors.guardianConsent)}
                 />
               </div>
@@ -577,10 +576,9 @@ export function ProfileForm({uploadMode}: {uploadMode: UploadMode}) {
       <section className={styles.section} aria-label="Consent">
         <div data-has-error={errors.consent ? 'true' : undefined}>
           <CheckboxInput
-            label={CONSENT_TEXT}
+            label={`${CONSENT_TEXT} *`}
             value={s.consent}
             onChange={(v) => set('consent', v)}
-            isRequired
             status={err(errors.consent)}
           />
         </div>
