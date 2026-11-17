@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import {ProfileForm} from '@/components/form/ProfileForm';
 import {SiteFooter, SiteHeader} from '@/components/site/SiteHeader';
 import styles from '@/components/site/site.module.css';
@@ -12,6 +13,9 @@ export default function RegisterPage() {
         <h1 className="mad-visually-hidden">Actor registration</h1>
         <div className={styles.formColumn}>
           <ProfileForm uploadMode={uploadMode} />
+          <p className={styles.helpLine}>
+            Questions about registering? <Link href="/faq">Read the FAQ</Link>
+          </p>
         </div>
       </main>
       <SiteFooter />

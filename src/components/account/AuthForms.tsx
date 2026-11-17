@@ -56,6 +56,7 @@ export function LoginForm() {
       <div className={styles.links}>
         <Link href="/account/forgot">Forgot password?</Link>
         <Link href="/">Register as an actor</Link>
+        <Link href="/faq">FAQ</Link>
       </div>
     </form>
   );

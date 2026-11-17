@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {Button} from '@astryxdesign/core/Button';
-import {POLICY_LINKS} from '@/lib/legal';
+import {HELP_LINKS, POLICY_LINKS} from '@/lib/legal';
 import {Logo} from './Logo';
 import {Year} from './Year';
 import styles from './site.module.css';
@@ -31,8 +31,8 @@ export function SiteFooter() {
         <p className={styles.footerLegal}>
           © 2011–<Year /> Madarth® | All rights reserved.
         </p>
-        <nav aria-label="Policies" className={styles.footerNav}>
-          {POLICY_LINKS.map((l) => (
+        <nav aria-label="Help and policies" className={styles.footerNav}>
+          {[...HELP_LINKS, ...POLICY_LINKS].map((l) => (
             <Link key={l.href} href={l.href}>
               {l.label}
             </Link>

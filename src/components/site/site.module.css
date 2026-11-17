@@ -148,6 +148,18 @@
   }
 }
 
+.helpLine {
+  margin: 24px 0 0;
+  text-align: center;
+  color: var(--mad-muted);
+  font-size: 15px;
+}
+
+.helpLine a {
+  color: var(--mad-yellow);
+  text-underline-offset: 3px;
+}
+
 .center {
   min-height: 70dvh;
   display: flex;

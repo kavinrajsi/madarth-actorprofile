@@ -20,3 +20,6 @@ export const POLICY_LINKS = [
   {href: '/photo-consent', label: 'Photo & Consent Policy'},
   {href: '/cookies', label: 'Cookie Policy'},
 ] as const;
+
+/** Help pages for actors, shown in the footer before the policies. */
+export const HELP_LINKS = [{href: '/faq', label: 'FAQ'}] as const;

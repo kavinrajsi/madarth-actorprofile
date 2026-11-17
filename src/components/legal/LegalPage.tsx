@@ -4,20 +4,22 @@ import styles from './legal.module.css';
 
 type Props = {
   title: string;
+  /** Small label above the title. */
+  eyebrow?: string;
   intro?: React.ReactNode;
   /** Section anchors for the on-page contents list. */
   sections?: {id: string; title: string}[];
   children: React.ReactNode;
 };
 
-export function LegalPage({title, intro, sections, children}: Props) {
+export function LegalPage({title, eyebrow = 'Policies', intro, sections, children}: Props) {
   return (
     <>
       <SiteHeader />
       <main className="mad-container">
         <article className={styles.article}>
           <header className={styles.head}>
-            <span className="mad-eyebrow">Policies</span>
+            <span className="mad-eyebrow">{eyebrow}</span>
             <h1 className={styles.title}>{title}</h1>
             <p className={styles.updated}>Last updated: {LEGAL.lastUpdated}</p>
             {intro && <div className={styles.intro}>{intro}</div>}
