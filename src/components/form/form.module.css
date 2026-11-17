@@ -78,11 +78,21 @@
 
 .guidelines ul {
   margin: 8px 0 12px;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  padding-left: 22px;
+  list-style: disc outside;
   line-height: 22px;
+}
+
+.guidelines li {
+  display: list-item;
+}
+
+.guidelines li + li {
+  margin-top: 4px;
+}
+
+.guidelines li::marker {
+  color: var(--mad-yellow);
 }
 
 .guidelinesTitle {
