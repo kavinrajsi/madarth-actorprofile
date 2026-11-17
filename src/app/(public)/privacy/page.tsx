@@ -62,6 +62,11 @@ export default function PrivacyPage() {
             hashes) and, if you add one, a passkey&apos;s public key. Fingerprint and Face ID checks happen on your
             own device; we never receive fingerprint or face data.
           </li>
+          <li>
+            Account activity: sign-ins and failed sign-in attempts, security changes and profile updates, with the time,
+            IP address, browser and device type, and approximate location (city) worked out from the IP address. You can
+            see your own activity on your account page.
+          </li>
         </ul>
         <h3>Information collected automatically</h3>
         <ul>
@@ -88,6 +93,10 @@ export default function PrivacyPage() {
           </li>
           <li>To keep an organised talent database so the casting team can search and shortlist actors.</li>
           <li>To prevent spam, fraud and duplicate profiles.</li>
+          <li>
+            To keep accounts secure: activity records help you and us spot sign-ins you don&apos;t recognise, and show
+            who on our team accessed or changed a profile.
+          </li>
         </ul>
         <p>We do not sell your data, and we do not use it for marketing unrelated to casting.</p>
       </Section>
@@ -157,6 +166,11 @@ export default function PrivacyPage() {
           to remove it, whichever is earlier. After that we delete your details and photographs. To stay in our
           database longer, you can submit a fresh profile.
         </p>
+        <p>
+          Account activity records are kept for 2 years and then deleted automatically. If you delete your account,
+          your activity records are deleted with it; we keep only a note that profile ID was deleted, without your
+          details.
+        </p>
       </Section>
 
       <Section id="security" title="How we protect it">
@@ -166,6 +180,10 @@ export default function PrivacyPage() {
           <li>All data travels over encrypted (HTTPS) connections.</li>
           <li>Account passwords are stored only as salted one-way hashes; sign-in links work once and expire.</li>
           <li>Every actor sign-in needs a second step: an authenticator-app code, a passkey or a one-time backup code.</li>
+          <li>
+            Madarth staff actions on profiles (opening a profile, changing its status, editing notes) are logged with the
+            staff member&apos;s name, time and IP address, so access to your data is accountable.
+          </li>
         </ul>
         <p>No system is perfectly secure, but we take reasonable steps to protect your data and will tell you and the authorities about a breach as the law requires.</p>
       </Section>

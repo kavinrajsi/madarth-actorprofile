@@ -36,6 +36,13 @@
       "when": 1794927000415,
       "tag": "0004_two_factor",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794928162827,
+      "tag": "0005_activity_log",
+      "breakpoints": true
     }
   ]
 }

@@ -18,11 +18,24 @@ export const {handlers, auth, signIn, signOut} = NextAuth({
   providers: [Google],
   session: {strategy: 'jwt', maxAge: 60 * 60 * 24 * 7},
   pages: {signIn: '/login', error: '/login'},
+  events: {
+    async signIn({profile}) {
+      if (!profile?.email) return;
+      const {logActivity} = await import('@/lib/activity');
+      await logActivity({actorType: 'admin', adminEmail: profile.email.toLowerCase(), action: 'admin_sign_in'});
+    },
+  },
   callbacks: {
     async signIn({account, profile}) {
       if (account?.provider !== 'google') return false;
       if (!profile?.email || profile.email_verified !== true) return false;
-      return (await resolveRole(profile.email)) !== null;
+      const allowed = (await resolveRole(profile.email)) !== null;
+      if (!allowed) {
+        // Loaded lazily so the proxy bundle doesn't pull in the database.
+        const {logActivity} = await import('@/lib/activity');
+        await logActivity({actorType: 'admin', action: 'admin_sign_in_denied', details: {email: profile.email.toLowerCase()}});
+      }
+      return allowed;
     },
     async jwt({token, profile}) {
       if (profile?.email) {

@@ -7,6 +7,8 @@ import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {Step, Stepper} from '@astryxdesign/core/Stepper';
 import {DeleteProfile} from '@/components/account/AccountControls';
 import {SecuritySettings} from '@/components/account/TwoFactor';
+import {ActivityList} from '@/components/activity/ActivityList';
+import {actorActivity} from '@/lib/activity-queries';
 import {MaterialIcon} from '@/components/icons/MaterialIcon';
 import {getDb, schema} from '@/db';
 import {ageFromDob} from '@/lib/age';
@@ -53,10 +55,11 @@ export default async function AccountPage({
     .from(schema.actorPhotos)
     .where(inArray(schema.actorPhotos.actorId, [profile.id]))
     .orderBy(asc(schema.actorPhotos.sort));
-  const [backupLeft, passkeys, rp] = await Promise.all([
+  const [backupLeft, passkeys, rp, activity] = await Promise.all([
     backupCodesLeft(account.id),
     listPasskeys(account.id),
     passkeyRelyingParty(),
+    actorActivity(account.id, profiles.map((x) => x.id), 1, 8),
   ]);
   const headshot = photos.find((x) => x.kind === 'headshot');
   const status = ACTOR_STATUS_LABEL[profile.status];
@@ -262,6 +265,26 @@ export default async function AccountPage({
                 lastUsed: k.lastUsedAt ? dateFmt.format(k.lastUsedAt) : null,
               }))}
             />
+          </section>
+
+          {/* Recent activity */}
+          <section className={styles.card} aria-labelledby="activity-h">
+            <div className={styles.cardHead}>
+              <h2 id="activity-h" className={styles.cardTitle}>
+                Recent activity
+              </h2>
+              {activity.total > activity.rows.length && (
+                <Link href="/account/activity" className={styles.cardLink}>
+                  See all activity
+                </Link>
+              )}
+            </div>
+            <ActivityList entries={activity.rows} audience="actor" />
+            {activity.rows.some((r) => r.action === 'sign_in_failed') && (
+              <p className={styles.meta}>
+                Don&apos;t recognise a sign-in or failed attempt? <Link href="/account/forgot">Reset your password</Link>.
+              </p>
+            )}
           </section>
 
           {/* Danger zone */}

@@ -18,7 +18,7 @@ function authorized(req: Request): boolean {
 
 /**
  * Daily (Vercel Cron): remove photo uploads from registration/edit forms that were never saved,
- * and prune old rate-limit rows.
+ * prune old rate-limit rows, and delete activity-log entries older than 2 years.
  */
 export async function GET(req: Request) {
   if (!authorized(req)) return new Response('Unauthorized', {status: 401});
@@ -57,7 +57,19 @@ export async function GET(req: Request) {
       .where(lt(schema.rateEvents.at, new Date(Date.now() - 2 * 24 * 3600 * 1000)))
       .returning({id: schema.rateEvents.id});
 
-    const result = {draftFolders: folders.size, deletedFolders: stale.length, deletedFiles: urls.length, prunedRateRows: pruned.length};
+    // Activity log retention: 2 years (see Privacy Policy).
+    const expired = await db
+      .delete(schema.activityLog)
+      .where(lt(schema.activityLog.at, new Date(Date.now() - 730 * 24 * 3600 * 1000)))
+      .returning({id: schema.activityLog.id});
+
+    const result = {
+      draftFolders: folders.size,
+      deletedFolders: stale.length,
+      deletedFiles: urls.length,
+      prunedRateRows: pruned.length,
+      expiredActivityRows: expired.length,
+    };
     console.log('[cron] cleanup-uploads', JSON.stringify(result));
     return Response.json(result);
   } catch (err) {

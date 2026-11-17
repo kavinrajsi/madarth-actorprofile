@@ -15,7 +15,8 @@ import {
   profilesForAccount,
   sendSetupInvite,
 } from '@/lib/account/service';
-import {endActorSession, requireActorAccount, startPendingSession} from '@/lib/account/session';
+import {endActorSession, getActorAccount, requireActorAccount, startPendingSession} from '@/lib/account/session';
+import {logActivity} from '@/lib/activity';
 import {TOKEN_TTL_MS} from '@/lib/account/tokens';
 import {sendAndLog} from '@/lib/email/send';
 import {passwordResetEmail} from '@/lib/email/templates';
@@ -44,6 +45,9 @@ export async function loginAction(rawEmail: string, password: string): Promise<A
   const account = await findAccountByEmail(email);
   const valid = await verifyPassword(password, account?.passwordHash ?? DUMMY_HASH);
   if (!account || !account.passwordHash || !valid) {
+    if (account?.passwordHash) {
+      await logActivity({actorType: 'actor', accountId: account.id, action: 'sign_in_failed', details: {step: 'password'}});
+    }
     return {ok: false, message: 'Email or password is incorrect.'};
   }
   // Password is right; the authenticator code / passkey comes next (/account/verify).
@@ -52,6 +56,8 @@ export async function loginAction(rawEmail: string, password: string): Promise<A
 }
 
 export async function logoutAction() {
+  const account = await getActorAccount();
+  if (account) await logActivity({actorType: 'actor', accountId: account.id, action: 'sign_out'});
   await endActorSession();
   redirect('/account/login');
 }
@@ -83,6 +89,7 @@ async function setPasswordWithToken(
     .where(eq(actorAccounts.id, used.accountId))
     .returning();
   if (!account) return {ok: false, message: 'Account not found.'};
+  await logActivity({actorType: 'actor', accountId: account.id, action: purpose === 'setup' ? 'password_set' : 'password_reset'});
   await startPendingSession(account);
   return {ok: true};
 }
@@ -105,6 +112,7 @@ export async function forgotPasswordAction(rawEmail: string): Promise<ActionResu
   try {
     const account = await findAccountByEmail(email);
     if (account?.passwordHash) {
+      await logActivity({actorType: 'actor', accountId: account.id, action: 'password_reset_requested'});
       const token = await issueToken(account.id, 'reset');
       await sendAndLog({
         to: account.email,
@@ -179,9 +187,16 @@ export async function updateProfileAction(code: string, input: SubmissionInput):
     .sort((a, b) => PHOTO_ORDER[a.kind] - PHOTO_ORDER[b.kind])
     .map((p, i) => ({...p, actorId: actor.id, sort: i}));
 
+  const fields = profileFields(v);
+  // Names of changed fields only (never values) for the activity log.
+  const changed = (Object.keys(fields) as (keyof typeof fields)[]).filter(
+    (k) => k !== 'cityNormalized' && k !== 'instagramHandle' && k !== 'guardianConsent' &&
+      JSON.stringify(fields[k] ?? null) !== JSON.stringify(actor[k] ?? null),
+  );
+
   try {
     await db.batch([
-      db.update(actors).set({...profileFields(v), updatedAt: new Date()}).where(eq(actors.id, actor.id)),
+      db.update(actors).set({...fields, updatedAt: new Date()}).where(eq(actors.id, actor.id)),
       db.delete(actorPhotos).where(eq(actorPhotos.actorId, actor.id)),
       db.insert(actorPhotos).values(rows),
     ]);
@@ -192,6 +207,14 @@ export async function updateProfileAction(code: string, input: SubmissionInput):
   if (removed.length) {
     await del(removed.map((p) => p.blobPathname)).catch((err) => console.warn('[account] blob cleanup failed:', safeError(err)));
   }
+  await logActivity({
+    actorType: 'actor',
+    accountId: account.id,
+    subjectActorId: actor.id,
+    subjectCode: actor.actorCode,
+    action: 'profile_updated',
+    details: {fields: changed, photosAdded: added.length, photosRemoved: removed.length},
+  });
   return {ok: true};
 }
 
@@ -206,8 +229,14 @@ export async function deleteProfileAction(code: string, confirmText: string): Pr
   const db = getDb();
   const photos = await db.select({pathname: actorPhotos.blobPathname}).from(actorPhotos).where(eq(actorPhotos.actorId, actor.id));
   try {
-    // Photos and status history are removed by ON DELETE CASCADE.
-    await db.delete(actors).where(eq(actors.id, actor.id));
+    // Photos and status history are removed by ON DELETE CASCADE. The actor's own activity about this
+    // profile (e.g. registration, with their IP) goes too; casting-team entries keep only the Actor ID.
+    await db.batch([
+      db
+        .delete(schema.activityLog)
+        .where(and(eq(schema.activityLog.subjectActorId, actor.id), eq(schema.activityLog.actorType, 'actor'))),
+      db.delete(actors).where(eq(actors.id, actor.id)),
+    ]);
   } catch (err) {
     console.error('[account] profile delete failed:', safeError(err));
     return {ok: false, message: 'Something went wrong. Please try again or email us.'};
@@ -217,9 +246,14 @@ export async function deleteProfileAction(code: string, confirmText: string): Pr
   }
 
   const remaining = await profilesForAccount(account.email);
+  // Kept for the casting team's record: the Actor ID only, no personal or device details.
+  await logActivity({actorType: 'system', subjectCode: actor.actorCode, action: 'profile_deleted', withoutRequestInfo: true});
   if (remaining.length === 0) {
+    // The account (and its own activity entries) is removed entirely.
     await db.delete(actorAccounts).where(eq(actorAccounts.id, account.id));
     await endActorSession();
+  } else {
+    await logActivity({actorType: 'actor', accountId: account.id, subjectCode: actor.actorCode, action: 'profile_deleted'});
   }
   return {ok: true};
 }

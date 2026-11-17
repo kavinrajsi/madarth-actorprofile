@@ -8,6 +8,7 @@ export function AdminNav({isSuperAdmin}: {isSuperAdmin: boolean}) {
   const path = usePathname();
   const items = [
     {href: '/admin', label: 'Profiles', active: path === '/admin' || path.startsWith('/admin/actors')},
+    {href: '/admin/activity', label: 'Activity', active: path.startsWith('/admin/activity')},
     ...(isSuperAdmin ? [{href: '/admin/team', label: 'Team', active: path.startsWith('/admin/team')}] : []),
   ];
   return (

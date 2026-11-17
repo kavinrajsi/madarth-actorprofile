@@ -7,7 +7,7 @@ import {z} from 'zod';
 import {signOut} from '@/auth';
 import {getDb, schema} from '@/db';
 import {statusEnum} from '@/db/schema-enums';
-import {requireAdmin, requireSuperAdmin} from '@/lib/authz';
+import {getAdmin, requireAdmin, requireSuperAdmin} from '@/lib/authz';
 import {superAdminEmails} from '@/lib/roles';
 import {ensureAccount, findAccountByEmail, sendSetupInvite} from '@/lib/account/service';
 import {resetTwoFactor} from '@/lib/account/mfa';
@@ -15,6 +15,7 @@ import {sendAndLog} from '@/lib/email/send';
 import {securityEmail} from '@/lib/email/templates';
 import {LEGAL} from '@/lib/legal';
 import {siteUrl} from '@/lib/site-url';
+import {logActivity} from '@/lib/activity';
 
 type Result = {ok: true} | {ok: false; message: string};
 
@@ -44,19 +45,30 @@ export async function updateStatus(actorId: string, status: string): Promise<Res
       byEmail: admin.email,
     }),
   ]);
+  await logActivity({
+    actorType: 'admin',
+    adminEmail: admin.email,
+    subjectActorId: actorId,
+    subjectCode: current.code,
+    action: 'status_changed',
+    details: {from: current.status, to: parsed.data.status},
+  });
   revalidatePath('/admin');
   revalidatePath(`/admin/actors/${current.code}`);
   return {ok: true};
 }
 
 export async function saveNotes(actorId: string, notes: string): Promise<Result> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const parsed = z.object({actorId: z.uuid(), notes: z.string().max(5000)}).safeParse({actorId, notes});
   if (!parsed.success) return {ok: false, message: 'Notes must be under 5000 characters'};
-  await getDb()
+  const [row] = await getDb()
     .update(schema.actors)
     .set({notes: parsed.data.notes.trim() || null, updatedAt: new Date()})
-    .where(eq(schema.actors.id, actorId));
+    .where(eq(schema.actors.id, actorId))
+    .returning({code: schema.actors.actorCode});
+  // The notes text itself is never logged.
+  if (row) await logActivity({actorType: 'admin', adminEmail: admin.email, subjectActorId: actorId, subjectCode: row.code, action: 'notes_saved'});
   return {ok: true};
 }
 
@@ -71,23 +83,30 @@ export async function addMember(email: string): Promise<Result> {
     .insert(schema.teamMembers)
     .values({email: parsed.data, addedBy: admin.email})
     .onConflictDoNothing();
+  await logActivity({actorType: 'admin', adminEmail: admin.email, action: 'member_added', details: {email: parsed.data}});
   revalidatePath('/admin/team');
   return {ok: true};
 }
 
 export async function removeMember(email: string): Promise<Result> {
-  await requireSuperAdmin();
-  await getDb().delete(schema.teamMembers).where(eq(schema.teamMembers.email, email.toLowerCase()));
+  const admin = await requireSuperAdmin();
+  const [removed] = await getDb()
+    .delete(schema.teamMembers)
+    .where(eq(schema.teamMembers.email, email.toLowerCase()))
+    .returning({email: schema.teamMembers.email});
+  if (removed) await logActivity({actorType: 'admin', adminEmail: admin.email, action: 'member_removed', details: {email: removed.email}});
   revalidatePath('/admin/team');
   return {ok: true};
 }
 
 export async function signOutAction() {
+  const admin = await getAdmin();
+  if (admin) await logActivity({actorType: 'admin', adminEmail: admin.email, action: 'admin_sign_out'});
   await signOut({redirectTo: '/login'});
 }
 
 export async function resendInviteAction(actorId: string): Promise<Result> {
-  await requireAdmin();
+  const admin = await requireAdmin();
   if (!z.uuid().safeParse(actorId).success) return {ok: false, message: 'Invalid profile'};
   const [actor] = await getDb()
     .select({id: schema.actors.id, email: schema.actors.email, name: schema.actors.fullName, code: schema.actors.actorCode})
@@ -98,6 +117,9 @@ export async function resendInviteAction(actorId: string): Promise<Result> {
   const account = await ensureAccount(actor.email);
   if (account.passwordHash) return {ok: false, message: 'This actor has already set up their account.'};
   const res = await sendSetupInvite(account, actor.name.split(' ')[0] || actor.name, actor.id);
+  if (res.status === 'sent') {
+    await logActivity({actorType: 'admin', adminEmail: admin.email, subjectActorId: actor.id, subjectCode: actor.code, action: 'invite_resent'});
+  }
   revalidatePath(`/admin/actors/${actor.code}`);
   return res.status === 'sent' ? {ok: true} : {ok: false, message: `Email not sent (${res.error})`};
 }
@@ -115,7 +137,7 @@ export async function resetTwoFactorAction(actorId: string): Promise<Result> {
   const account = await findAccountByEmail(actor.email);
   if (!account?.totpEnabledAt) return {ok: false, message: 'Two-factor is not set up for this actor.'};
   await resetTwoFactor(account.id);
-  console.log(`[admin] two-factor reset for ${actor.code} by ${admin.email}`);
+  await logActivity({actorType: 'admin', adminEmail: admin.email, subjectActorId: actorId, subjectCode: actor.code, action: 'two_factor_reset'});
   after(() =>
     sendAndLog({
       to: account.email,

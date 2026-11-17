@@ -5,6 +5,10 @@ import {NotesEditor} from '@/components/admin/NotesEditor';
 import {StatusBadge} from '@/components/admin/StatusBadge';
 import {ResendInvite} from '@/components/admin/ResendInvite';
 import {ResetTwoFactor} from '@/components/admin/ResetTwoFactor';
+import {ActivityList} from '@/components/activity/ActivityList';
+import {Pager} from '@/components/admin/Pager';
+import {logActivity, recentlyViewed} from '@/lib/activity';
+import {profileActivity} from '@/lib/activity-queries';
 import {StatusControl} from '@/components/admin/StatusControl';
 import {requireAdmin} from '@/lib/authz';
 import {GENDER_LABEL, STATUS_LABEL} from '@/lib/constants';
@@ -36,12 +40,25 @@ function Ext({href}: {href: string}) {
   );
 }
 
-export default async function ActorPage({params}: {params: Promise<{code: string}>}) {
-  await requireAdmin();
+const ACTIVITY_PAGE_SIZE = 20;
+
+export default async function ActorPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{code: string}>;
+  searchParams: Promise<{ap?: string}>;
+}) {
+  const admin = await requireAdmin();
   const {code} = await params;
+  const activityPage = Math.max(1, Number.parseInt((await searchParams).ap ?? '1', 10) || 1);
   const data = await getActorByCode(decodeURIComponent(code));
   if (!data) notFound();
   const {actor: a, photos, history} = data;
+  // Accountability for personal data: who opened this profile (once per 30 min per admin).
+  if (!(await recentlyViewed(admin.email, a.id))) {
+    await logActivity({actorType: 'admin', adminEmail: admin.email, subjectActorId: a.id, subjectCode: a.actorCode, action: 'profile_viewed'});
+  }
   const [account, emails] = await Promise.all([
     findAccountByEmail(a.email),
     getDb()
@@ -51,6 +68,7 @@ export default async function ActorPage({params}: {params: Promise<{code: string
       .orderBy(desc(schema.emailEvents.at))
       .limit(20),
   ]);
+  const activity = await profileActivity(a.id, account?.id ?? null, activityPage, ACTIVITY_PAGE_SIZE);
   const EMAIL_LABEL = {thank_you: 'Thank-you', invite: 'Account invite', password_reset: 'Password reset', email_change: 'Email change', security: 'Security alert'} as const;
 
   return (
@@ -201,6 +219,25 @@ export default async function ActorPage({params}: {params: Promise<{code: string
                 </li>
               ))}
             </ul>
+          </section>
+
+          <section className={styles.panel}>
+            <h2 className={styles.panelTitle}>Activity</h2>
+            <ActivityList
+              entries={activity.rows}
+              audience="admin"
+              showWho
+              emptyText="No activity recorded yet."
+            />
+            {activity.total > ACTIVITY_PAGE_SIZE && (
+              <Pager
+                page={activityPage}
+                totalItems={activity.total}
+                pageSize={ACTIVITY_PAGE_SIZE}
+                param="ap"
+                label="Activity pages"
+              />
+            )}
           </section>
 
           <section className={styles.panel}>

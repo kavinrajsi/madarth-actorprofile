@@ -4,4 +4,5 @@ export const genderEnum = ['male', 'female', 'non_binary', 'other', 'prefer_not'
 export const statusEnum = ['new', 'shortlisted', 'contacted', 'selected', 'not_suitable'] as const;
 export const photoKindEnum = ['headshot', 'gallery', 'full_length'] as const;
 export const tokenPurposeEnum = ['setup', 'reset', 'email_change'] as const;
+export const activityActorEnum = ['actor', 'admin', 'system'] as const;
 export const emailKindEnum = ['thank_you', 'invite', 'password_reset', 'email_change', 'security'] as const;

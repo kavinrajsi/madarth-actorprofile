@@ -4,10 +4,14 @@ import {headers} from 'next/headers';
 import {and, eq, gt, lt, sql} from 'drizzle-orm';
 import {getDb, schema} from '@/db';
 
-export async function clientIpKey(): Promise<string> {
+/** Client IP as Vercel reports it ('unknown' when absent). */
+export async function clientIp(): Promise<string> {
   const h = await headers();
-  const ip =
-    h.get('x-real-ip') ?? h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+  return h.get('x-real-ip') ?? h.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
+}
+
+export async function clientIpKey(): Promise<string> {
+  const ip = await clientIp();
   // Hash so raw IPs are never stored.
   return createHash('sha256')
     .update(ip + (process.env.AUTH_SECRET ?? ''))

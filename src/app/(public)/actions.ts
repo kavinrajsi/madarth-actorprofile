@@ -7,6 +7,7 @@ import {getDb, schema} from '@/db';
 import {sendRegistrationEmails} from '@/lib/account/service';
 import {checkNewPhoto, PHOTO_ORDER, profileFields} from '@/lib/actor-fields';
 import {CONSENT_VERSION} from '@/lib/constants';
+import {logActivity} from '@/lib/activity';
 import {safeError} from '@/lib/log';
 import {rateLimit} from '@/lib/rate-limit';
 import {fieldErrors, submissionSchema, type SubmissionInput} from '@/lib/validation';
@@ -74,6 +75,7 @@ export async function submitProfile(input: SubmissionInput): Promise<SubmitResul
     if (!code) throw new Error('No actor code returned');
     // 1) thank-you email, 2) account invitation, sent after the response is returned.
     after(() => sendRegistrationEmails(actorId));
+    await logActivity({actorType: 'actor', subjectActorId: actorId, subjectCode: code, action: 'profile_submitted'});
     return {ok: true, code};
   } catch (err) {
     console.error('submitProfile failed:', safeError(err));

@@ -530,3 +530,14 @@
     grid-template-columns: 1fr;
   }
 }
+
+.cardLink {
+  color: var(--mad-yellow);
+  font-size: 14px;
+  text-underline-offset: 3px;
+}
+
+.meta a {
+  color: var(--mad-yellow);
+  text-underline-offset: 3px;
+}

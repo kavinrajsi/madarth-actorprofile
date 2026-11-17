@@ -12,6 +12,8 @@ import {
   verifySecondFactor,
 } from '@/lib/account/mfa';
 import {getActorAccount, getPendingAccount, startActorSession} from '@/lib/account/session';
+import {logActivity} from '@/lib/activity';
+import type {ActivityAction} from '@/lib/activity-actions';
 import {
   listPasskeys,
   MAX_PASSKEYS,
@@ -47,7 +49,12 @@ function notify(account: ActorAccount, heading: string, message: string) {
   );
 }
 
-async function finishSignIn(account: ActorAccount) {
+const log = (account: ActorAccount, action: ActivityAction, details?: Record<string, unknown>) =>
+  logActivity({actorType: 'actor', accountId: account.id, action, details});
+
+/** Starts the full session. `method` is logged as a sign-in (omitted when already signed in). */
+async function finishSignIn(account: ActorAccount, method?: 'totp' | 'backup' | 'passkey') {
+  if (method) await log(account, 'sign_in', {method});
   await getDb()
     .update(schema.actorAccounts)
     .set({lastLoginAt: new Date()})
@@ -62,13 +69,17 @@ export async function verifySignInCodeAction(code: string): Promise<{ok: true} |
   const account = await getPendingAccount();
   if (!account || !account.totpEnabledAt) return EXPIRED;
   if (!code.trim()) return fail('Enter the 6-digit code from your authenticator app.');
-  if (!(await attemptAllowed(account.id))) return TOO_MANY;
+  if (!(await attemptAllowed(account.id))) {
+    await log(account, 'sign_in_failed', {reason: 'rate_limited'});
+    return TOO_MANY;
+  }
   const used = await verifySecondFactor(account, code);
   if (!used) {
     await recordFailure(account.id);
+    await log(account, 'sign_in_failed', {step: 'code'});
     return WRONG_CODE;
   }
-  await finishSignIn(account);
+  await finishSignIn(account, used);
   if (used === 'backup') {
     notify(account, 'A backup code was used', 'Someone signed in to your Madarth Casting account with one of your backup codes.');
   }
@@ -85,7 +96,10 @@ export async function passkeySignInOptionsAction() {
 export async function passkeySignInVerifyAction(response: AuthenticationResponseJSON): Promise<{ok: true} | Fail> {
   const account = await getPendingAccount();
   if (!account || !account.totpEnabledAt) return EXPIRED;
-  if (!(await attemptAllowed(account.id))) return TOO_MANY;
+  if (!(await attemptAllowed(account.id))) {
+    await log(account, 'sign_in_failed', {reason: 'rate_limited'});
+    return TOO_MANY;
+  }
   let verified = false;
   try {
     verified = await verifyPasskeyAuthentication(account, response);
@@ -94,9 +108,10 @@ export async function passkeySignInVerifyAction(response: AuthenticationResponse
   }
   if (!verified) {
     await recordFailure(account.id);
+    await log(account, 'sign_in_failed', {step: 'passkey'});
     return fail('That passkey did not work. Try again or use your code.');
   }
-  await finishSignIn(account);
+  await finishSignIn(account, 'passkey');
   return {ok: true};
 }
 
@@ -140,7 +155,9 @@ export async function confirmAuthenticatorAction(code: string): Promise<{ok: tru
     await recordFailure(account.id);
     return WRONG_CODE;
   }
-  await finishSignIn(done.account);
+  await log(done.account, replacing ? 'authenticator_changed' : 'two_factor_enabled');
+  // First-time setup completes a sign-in; a replacement just refreshes the current session.
+  await finishSignIn(done.account, replacing ? undefined : 'totp');
   notify(
     account,
     replacing ? 'Authenticator app changed' : 'Two-factor sign-in turned on',
@@ -162,6 +179,7 @@ export async function regenerateBackupCodesAction(code: string): Promise<{ok: tr
     return WRONG_CODE;
   }
   const backupCodes = await replaceBackupCodes(account.id);
+  await log(account, 'backup_codes_regenerated');
   notify(account, 'New backup codes created', 'New backup codes were created for your Madarth Casting account. The old ones no longer work.');
   return {ok: true, backupCodes};
 }
@@ -188,6 +206,7 @@ export async function passkeyRegisterVerifyAction(response: RegistrationResponse
     console.error('passkey registration failed:', safeError(err));
     return fail('Could not add that passkey. Please try again.');
   }
+  await log(account, 'passkey_added', {name});
   notify(account, 'Passkey added', `A passkey ("${name}") was added to your Madarth Casting account for signing in.`);
   return {ok: true};
 }
@@ -200,6 +219,7 @@ export async function removePasskeyAction(id: string): Promise<{ok: true} | Fail
     .where(and(eq(schema.actorPasskeys.id, id), eq(schema.actorPasskeys.accountId, account.id)))
     .returning({name: schema.actorPasskeys.name});
   if (!removed) return fail('Passkey not found.');
+  await log(account, 'passkey_removed', {name: removed.name});
   notify(account, 'Passkey removed', `The passkey "${removed.name}" was removed from your Madarth Casting account.`);
   return {ok: true};
 }

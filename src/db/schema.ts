@@ -1,6 +1,7 @@
 import {sql} from 'drizzle-orm';
 import {
   bigint,
+  jsonb,
   boolean,
   date,
   index,
@@ -23,6 +24,8 @@ export const photoKindEnum = pgEnum('photo_kind', E.photoKindEnum);
 export const tokenPurposeEnum = pgEnum('token_purpose', E.tokenPurposeEnum);
 
 export const emailKindEnum = pgEnum('email_kind', E.emailKindEnum);
+
+export const activityActorEnum = pgEnum('activity_actor', E.activityActorEnum);
 
 export const actorCodeSeq = pgSequence('actor_code_seq', {startWith: 1, increment: 1});
 
@@ -244,7 +247,39 @@ export const emailEvents = pgTable(
 );
 
 export type Actor = typeof actors.$inferSelect;
+/**
+ * Audit trail: what actors did with their accounts and what admins did in the dashboard.
+ * Kept 2 years (daily cron). Actor entries are deleted with the account.
+ * `details` holds only safe metadata (field names, from/to status) — never codes, notes or profile values.
+ */
+export const activityLog = pgTable(
+  'activity_log',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    at: timestamp('at', {withTimezone: true}).notNull().defaultNow(),
+    actorType: activityActorEnum('actor_type').notNull(),
+    accountId: uuid('account_id').references(() => actorAccounts.id, {onDelete: 'cascade'}),
+    adminEmail: text('admin_email'),
+    subjectActorId: uuid('subject_actor_id').references(() => actors.id, {onDelete: 'set null'}),
+    /** Actor ID snapshot (e.g. MAD-26-00001), kept after the profile is deleted. */
+    subjectCode: text('subject_code'),
+    action: text('action').notNull(),
+    details: jsonb('details').$type<Record<string, unknown>>(),
+    ip: text('ip'),
+    userAgent: text('user_agent'),
+    device: text('device'),
+    location: text('location'),
+  },
+  (t) => [
+    index('activity_account_idx').on(t.accountId, t.at),
+    index('activity_subject_idx').on(t.subjectActorId, t.at),
+    index('activity_type_idx').on(t.actorType, t.at),
+    index('activity_admin_idx').on(t.adminEmail, t.at),
+  ],
+);
+
 export type ActorAccount = typeof actorAccounts.$inferSelect;
+export type ActivityEntry = typeof activityLog.$inferSelect;
 export type ActorPasskey = typeof actorPasskeys.$inferSelect;
 export type ActorPhoto = typeof actorPhotos.$inferSelect;
 export type ActorStatus = (typeof E.statusEnum)[number];
