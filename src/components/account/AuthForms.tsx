@@ -12,6 +12,7 @@ import {
   resetPasswordAction,
   setupPasswordAction,
 } from '@/app/account/actions';
+import {PasswordStrength} from './PasswordStrength';
 import styles from './account.module.css';
 
 const err = (m?: string) => (m ? {type: 'error' as const, message: m} : undefined);
@@ -101,6 +102,7 @@ export function SetPasswordForm({token, email, mode}: {token: string; email: str
         status={err(errors.password)}
         width="100%"
       />
+      <PasswordStrength password={password} />
       <TextInput
         label="Confirm password"
         type="password"
