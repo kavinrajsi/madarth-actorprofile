@@ -15,7 +15,7 @@ import {
   profilesForAccount,
   sendSetupInvite,
 } from '@/lib/account/service';
-import {endActorSession, requireActorAccount, startActorSession} from '@/lib/account/session';
+import {endActorSession, requireActorAccount, startPendingSession} from '@/lib/account/session';
 import {TOKEN_TTL_MS} from '@/lib/account/tokens';
 import {sendAndLog} from '@/lib/email/send';
 import {passwordResetEmail} from '@/lib/email/templates';
@@ -46,8 +46,8 @@ export async function loginAction(rawEmail: string, password: string): Promise<A
   if (!account || !account.passwordHash || !valid) {
     return {ok: false, message: 'Email or password is incorrect.'};
   }
-  await getDb().update(actorAccounts).set({lastLoginAt: new Date()}).where(eq(actorAccounts.id, account.id));
-  await startActorSession(account);
+  // Password is right; the authenticator code / passkey comes next (/account/verify).
+  await startPendingSession(account);
   return {ok: true};
 }
 
@@ -77,14 +77,13 @@ async function setPasswordWithToken(
     .set({
       passwordHash: await hashPassword(password),
       passwordSetAt: new Date(),
-      lastLoginAt: new Date(),
-      // Signs out any other sessions.
+      // Signs out any other sessions. A new password never skips the second step.
       sessionVersion: sql`${actorAccounts.sessionVersion} + 1`,
     })
     .where(eq(actorAccounts.id, used.accountId))
     .returning();
   if (!account) return {ok: false, message: 'Account not found.'};
-  await startActorSession(account);
+  await startPendingSession(account);
   return {ok: true};
 }
 

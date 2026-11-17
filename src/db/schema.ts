@@ -1,5 +1,6 @@
 import {sql} from 'drizzle-orm';
 import {
+  bigint,
   boolean,
   date,
   index,
@@ -162,8 +163,51 @@ export const actorAccounts = pgTable('actor_accounts', {
   sessionVersion: integer('session_version').notNull().default(1),
   passwordSetAt: timestamp('password_set_at', {withTimezone: true}),
   lastLoginAt: timestamp('last_login_at', {withTimezone: true}),
+  /** Active authenticator-app (TOTP) secret, AES-256-GCM encrypted. Required to sign in. */
+  totpSecret: text('totp_secret'),
+  /** Secret being set up; becomes totpSecret once the actor enters a correct code. */
+  totpPendingSecret: text('totp_pending_secret'),
+  totpEnabledAt: timestamp('totp_enabled_at', {withTimezone: true}),
+  /** Last accepted 30-second time step; a code is never accepted twice. */
+  totpLastStep: integer('totp_last_step').notNull().default(0),
   createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
 });
+
+/** One-time recovery codes for two-factor sign-in. Only a SHA-256 hash is stored. */
+export const actorBackupCodes = pgTable(
+  'actor_backup_codes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => actorAccounts.id, {onDelete: 'cascade'}),
+    codeHash: text('code_hash').notNull().unique(),
+    usedAt: timestamp('used_at', {withTimezone: true}),
+    createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
+  },
+  (t) => [index('actor_backup_codes_account_idx').on(t.accountId)],
+);
+
+/** Passkeys (fingerprint / Face ID) usable as the second sign-in step. */
+export const actorPasskeys = pgTable(
+  'actor_passkeys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => actorAccounts.id, {onDelete: 'cascade'}),
+    /** base64url credential ID. */
+    credentialId: text('credential_id').notNull().unique(),
+    /** base64url COSE public key. */
+    publicKey: text('public_key').notNull(),
+    counter: bigint('counter', {mode: 'number'}).notNull().default(0),
+    transports: text('transports').array().notNull().default(sql`'{}'::text[]`),
+    name: text('name').notNull(),
+    createdAt: timestamp('created_at', {withTimezone: true}).notNull().defaultNow(),
+    lastUsedAt: timestamp('last_used_at', {withTimezone: true}),
+  },
+  (t) => [index('actor_passkeys_account_idx').on(t.accountId)],
+);
 
 /** One-time links (account setup, password reset, email change). Only a SHA-256 hash is stored. */
 export const accountTokens = pgTable(
@@ -201,6 +245,7 @@ export const emailEvents = pgTable(
 
 export type Actor = typeof actors.$inferSelect;
 export type ActorAccount = typeof actorAccounts.$inferSelect;
+export type ActorPasskey = typeof actorPasskeys.$inferSelect;
 export type ActorPhoto = typeof actorPhotos.$inferSelect;
 export type ActorStatus = (typeof E.statusEnum)[number];
 export type Gender = (typeof E.genderEnum)[number];

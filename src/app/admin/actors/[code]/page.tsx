@@ -4,6 +4,7 @@ import {Gallery} from '@/components/admin/Gallery';
 import {NotesEditor} from '@/components/admin/NotesEditor';
 import {StatusBadge} from '@/components/admin/StatusBadge';
 import {ResendInvite} from '@/components/admin/ResendInvite';
+import {ResetTwoFactor} from '@/components/admin/ResetTwoFactor';
 import {StatusControl} from '@/components/admin/StatusControl';
 import {requireAdmin} from '@/lib/authz';
 import {GENDER_LABEL, STATUS_LABEL} from '@/lib/constants';
@@ -50,7 +51,7 @@ export default async function ActorPage({params}: {params: Promise<{code: string
       .orderBy(desc(schema.emailEvents.at))
       .limit(20),
   ]);
-  const EMAIL_LABEL = {thank_you: 'Thank-you', invite: 'Account invite', password_reset: 'Password reset', email_change: 'Email change'} as const;
+  const EMAIL_LABEL = {thank_you: 'Thank-you', invite: 'Account invite', password_reset: 'Password reset', email_change: 'Email change', security: 'Security alert'} as const;
 
   return (
     <>
@@ -182,7 +183,15 @@ export default async function ActorPage({params}: {params: Promise<{code: string
                 ? `Account active${account.lastLoginAt ? `, last sign-in ${dt.format(account.lastLoginAt)}` : ''}.`
                 : 'Account not set up yet (actor has not created a password).'}
             </p>
+            {account?.passwordHash && (
+              <p className={styles.meta}>
+                {account.totpEnabledAt
+                  ? `Two-factor on since ${dt.format(account.totpEnabledAt)}.`
+                  : 'Two-factor not set up yet (asked for at next sign-in).'}
+              </p>
+            )}
             {!account?.passwordHash && <ResendInvite actorId={a.id} />}
+            {account?.totpEnabledAt && <ResetTwoFactor actorId={a.id} />}
             <ul className={styles.history}>
               {emails.length === 0 && <li>No emails sent yet.</li>}
               {emails.map((e) => (

@@ -20,8 +20,27 @@ export async function clientIpKey(): Promise<string> {
  * Good enough for a low-traffic public form; add a Vercel Firewall rate-limit rule for bursts.
  */
 export async function rateLimit(bucket: string, limit: number, windowSeconds: number): Promise<boolean> {
+  return rateLimitKey(`${bucket}:${await clientIpKey()}`, limit, windowSeconds);
+}
+
+/** True while `key` has fewer than `limit` hits in the window. Does not record a hit. */
+export async function underLimit(key: string, limit: number, windowSeconds: number): Promise<boolean> {
+  const since = new Date(Date.now() - windowSeconds * 1000);
+  const [{count}] = await getDb()
+    .select({count: sql<number>`count(*)::int`})
+    .from(schema.rateEvents)
+    .where(and(eq(schema.rateEvents.key, key), gt(schema.rateEvents.at, since)));
+  return count < limit;
+}
+
+/** Records one hit for `key` (e.g. a wrong two-factor code). */
+export async function recordHit(key: string) {
+  await getDb().insert(schema.rateEvents).values({key});
+}
+
+/** Same limiter with an explicit key, e.g. per account, regardless of IP. Every call counts. */
+export async function rateLimitKey(key: string, limit: number, windowSeconds: number): Promise<boolean> {
   const db = getDb();
-  const key = `${bucket}:${await clientIpKey()}`;
   const since = new Date(Date.now() - windowSeconds * 1000);
   const [{count}] = await db
     .select({count: sql<number>`count(*)::int`})

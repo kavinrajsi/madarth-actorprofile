@@ -6,12 +6,15 @@ import {MetadataList, MetadataListItem} from '@astryxdesign/core/MetadataList';
 import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {Step, Stepper} from '@astryxdesign/core/Stepper';
 import {DeleteProfile} from '@/components/account/AccountControls';
+import {SecuritySettings} from '@/components/account/TwoFactor';
 import {MaterialIcon} from '@/components/icons/MaterialIcon';
 import {getDb, schema} from '@/db';
 import {ageFromDob} from '@/lib/age';
 import {GENDER_LABEL} from '@/lib/constants';
 import {profileChecklist} from '@/lib/account/profile-strength';
+import {backupCodesLeft} from '@/lib/account/mfa';
 import {profilesForAccount} from '@/lib/account/service';
+import {listPasskeys, passkeyRelyingParty} from '@/lib/account/webauthn';
 import {requireActorAccount} from '@/lib/account/session';
 import {ACTOR_STATUS_LABEL} from '@/lib/account/status-label';
 import {logoutAction} from './actions';
@@ -24,10 +27,10 @@ const STEPS = ['new', 'shortlisted', 'contacted', 'selected'] as const;
 export default async function AccountPage({
   searchParams,
 }: {
-  searchParams: Promise<{saved?: string; welcome?: string; deleted?: string; p?: string}>;
+  searchParams: Promise<{saved?: string; deleted?: string; p?: string}>;
 }) {
   const account = await requireActorAccount();
-  const {saved, welcome, deleted, p: selectedCode} = await searchParams;
+  const {saved, deleted, p: selectedCode} = await searchParams;
   const profiles = await profilesForAccount(account.email);
   const profile = profiles.find((x) => x.actorCode === selectedCode) ?? profiles[0];
 
@@ -50,6 +53,11 @@ export default async function AccountPage({
     .from(schema.actorPhotos)
     .where(inArray(schema.actorPhotos.actorId, [profile.id]))
     .orderBy(asc(schema.actorPhotos.sort));
+  const [backupLeft, passkeys, rp] = await Promise.all([
+    backupCodesLeft(account.id),
+    listPasskeys(account.id),
+    passkeyRelyingParty(),
+  ]);
   const headshot = photos.find((x) => x.kind === 'headshot');
   const status = ACTOR_STATUS_LABEL[profile.status];
   const stepIndex = STEPS.indexOf(profile.status as (typeof STEPS)[number]);
@@ -69,7 +77,6 @@ export default async function AccountPage({
         </div>
       </header>
 
-      {welcome && <Banner status="success" title="Your password is set. You're signed in." />}
       {saved && <Banner status="success" title={`Profile ${saved} saved.`} />}
       {deleted && <Banner status="success" title="Profile deleted." />}
 
@@ -237,6 +244,24 @@ export default async function AccountPage({
                 </form>
               </li>
             </ul>
+          </section>
+
+          {/* Two-factor & passkeys */}
+          <section className={styles.card} aria-labelledby="security-h">
+            <h2 id="security-h" className={styles.cardTitle}>
+              Sign-in security
+            </h2>
+            <SecuritySettings
+              enabledOn={dateFmt.format(account.totpEnabledAt!)}
+              backupLeft={backupLeft}
+              passkeysAvailable={Boolean(rp)}
+              passkeys={passkeys.map((k) => ({
+                id: k.id,
+                name: k.name,
+                created: dateFmt.format(k.createdAt),
+                lastUsed: k.lastUsedAt ? dateFmt.format(k.lastUsedAt) : null,
+              }))}
+            />
           </section>
 
           {/* Danger zone */}

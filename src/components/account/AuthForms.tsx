@@ -33,7 +33,7 @@ export function LoginForm() {
         start(async () => {
           const res = await loginAction(email, password);
           if (res.ok) {
-            router.push('/account');
+            router.push('/account/verify');
             router.refresh();
           } else setError(res.message);
         });
@@ -80,7 +80,7 @@ export function SetPasswordForm({token, email, mode}: {token: string; email: str
           const action = mode === 'setup' ? setupPasswordAction : resetPasswordAction;
           const res = await action(token, password, confirm);
           if (res.ok) {
-            router.push('/account?welcome=1');
+            router.push('/account/verify');
             router.refresh();
           } else {
             setErrors(res.fieldErrors ?? {});

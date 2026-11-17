@@ -96,3 +96,22 @@ Choose a new password: ${p.link}
 This link works once and expires in ${p.minutes} minutes. If you didn't ask for this, ignore this email.`;
   return {subject, html, text};
 }
+
+/** Security notice (two-factor / passkey changes). Never contains codes or secrets. */
+export function securityEmail(p: {heading: string; message: string; loginUrl: string; contactEmail: string}): Email {
+  const subject = `Security alert: ${p.heading}`;
+  const html = layout(
+    subject,
+    `<h1 style="margin:0 0 16px;font-size:24px;line-height:30px;">${esc(p.heading)}</h1>
+<p style="margin:0;">${esc(p.message)}</p>
+${button(p.loginUrl, 'Open my account')}
+<p style="margin:16px 0 0;font-size:14px;color:#444444;">If this wasn't you, reset your password straight away and email ${esc(p.contactEmail)} so we can secure your account.</p>`,
+  );
+  const text = `${p.heading}
+
+${p.message}
+Open my account: ${p.loginUrl}
+
+If this wasn't you, reset your password straight away and email ${p.contactEmail} so we can secure your account.`;
+  return {subject, html, text};
+}

@@ -57,6 +57,11 @@ export default function PrivacyPage() {
             Your actor account: your login email and a password, which we store only as a one-way scrambled hash (we
             can&apos;t see it).
           </li>
+          <li>
+            Two-factor sign-in: your authenticator-app key (encrypted), your backup codes (stored only as one-way
+            hashes) and, if you add one, a passkey&apos;s public key. Fingerprint and Face ID checks happen on your
+            own device; we never receive fingerprint or face data.
+          </li>
         </ul>
         <h3>Information collected automatically</h3>
         <ul>
@@ -77,7 +82,10 @@ export default function PrivacyPage() {
         <ul>
           <li>To review your profile for current and future casting requirements: films, ads, campaigns and other productions.</li>
           <li>To contact you about auditions or roles by phone, WhatsApp or email.</li>
-          <li>To send you account emails: a registration thank-you, your account invitation and password resets.</li>
+          <li>
+            To send you account emails: a registration thank-you, your account invitation, password resets and
+            security alerts (for example when two-factor settings change).
+          </li>
           <li>To keep an organised talent database so the casting team can search and shortlist actors.</li>
           <li>To prevent spam, fraud and duplicate profiles.</li>
         </ul>
@@ -102,7 +110,8 @@ export default function PrivacyPage() {
           <li>
             <strong>session recordings</strong> (Microsoft Clarity): a replay of how the page was used, which can include
             text shown on the page and what is typed into form fields, such as your name, contact details and date of
-            birth. Passwords are never recorded, and sign-in links are hidden from both tools.
+            birth. Passwords are never recorded, and sign-in links, two-factor codes, authenticator keys and backup
+            codes are hidden from both tools.
           </li>
         </ul>
         <p>
@@ -156,6 +165,7 @@ export default function PrivacyPage() {
           <li>Dashboard access is limited to approved Madarth accounts and can be removed at any time.</li>
           <li>All data travels over encrypted (HTTPS) connections.</li>
           <li>Account passwords are stored only as salted one-way hashes; sign-in links work once and expire.</li>
+          <li>Every actor sign-in needs a second step: an authenticator-app code, a passkey or a one-time backup code.</li>
         </ul>
         <p>No system is perfectly secure, but we take reasonable steps to protect your data and will tell you and the authorities about a breach as the law requires.</p>
       </Section>

@@ -10,6 +10,7 @@ export const metadata: Metadata = {title: 'Actor sign in'};
 const NOTICES: Record<string, {status: 'success' | 'warning' | 'error'; title: string}> = {
   'link-expired': {status: 'warning', title: 'That link has expired or was already used.'},
   deleted: {status: 'success', title: 'Your profile and photos have been deleted.'},
+  'signin-timeout': {status: 'warning', title: 'Your sign-in timed out. Please sign in again.'},
 };
 
 export default async function LoginPage({searchParams}: {searchParams: Promise<{notice?: string}>}) {

@@ -433,3 +433,100 @@
 .dangerCard {
   border-color: #4a2a2a;
 }
+
+/* ── Two-factor ─────────────────────────────────────────── */
+.steps {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--mad-muted);
+}
+
+.qr {
+  display: block;
+  width: 200px;
+  height: 200px;
+  background: #ffffff;
+  image-rendering: pixelated;
+}
+
+.manualKey {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: var(--mad-paper);
+  word-break: break-all;
+}
+
+.backup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.codeGrid {
+  margin: 0;
+  padding: 16px;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 24px;
+  border: 1px dashed var(--mad-line);
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.or {
+  margin: 0;
+  text-align: center;
+  color: var(--mad-muted);
+  font-size: 14px;
+}
+
+.linkButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--mad-yellow);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.securityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings > li.settingPanel {
+  display: block;
+  border-top: 0;
+  padding-top: 0;
+  padding-left: 40px;
+}
+
+.settings > li.passkeyRow {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* Lines passkey rows up under the label, past the 24px icon column. */
+.passkeyRow > span:first-child {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .settings > li.settingPanel {
+    padding-left: 0;
+  }
+
+  .codeGrid {
+    grid-template-columns: 1fr;
+  }
+}
